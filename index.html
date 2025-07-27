@@ -46,6 +46,9 @@
 
         <div class="completion-status" id="completionStatus">
             Checklist Progress: <span id="progressText">0%</span>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
         </div>
 
         <!-- Pre-amble / Notices / Signatories -->
@@ -654,6 +657,7 @@
             <button class="button button-primary" id="loadButton">Load Saved Checklist</button>
             <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="loadFromFile(event)">
             <button class="button button-success" id="exportTextButton">Export to Text</button>
+            <button class="button button-primary" id="printButton">Print Checklist</button>
             <button class="button button-danger" id="clearAllButton">Clear All</button>
         </div>
     </div>

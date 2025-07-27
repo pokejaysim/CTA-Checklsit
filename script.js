@@ -5,6 +5,7 @@ function updateProgress() {
     const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
     const percentage = Math.round((checked / total) * 100);
     document.getElementById('progressText').textContent = `${percentage}% (${checked}/${total} items)`;
+    document.getElementById('progressBar').style.width = `${percentage}%`;
     saveChecklist(); // Save state on progress update
 }
 
@@ -293,4 +294,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('fileInput').addEventListener('change', loadFromFile);
     document.getElementById('exportTextButton').addEventListener('click', exportToText);
     document.getElementById('clearAllButton').addEventListener('click', clearAll);
+    document.getElementById('printButton').addEventListener('click', printChecklist);
 });
+
+// Print checklist
+function printChecklist() {
+    window.print();
+}
