@@ -70,11 +70,15 @@ const currencySymbols = {
     AUD: '$'
 };
 
+// Chart instance
+let budgetChart = null;
+
 // Initialize the calculator
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     loadFromLocalStorage();
     updateAllCalculations();
+    initializeBudgetChart();
 });
 
 // Setup event listeners
@@ -189,7 +193,8 @@ function addCustomItem(category) {
     const item = {
         id: Date.now(),
         name: '',
-        cost: 0
+        cost: 0,
+        date: new Date().toISOString().split('T')[0]
     };
     
     switch(category) {
@@ -226,6 +231,7 @@ function renderCustomItems(category, items) {
         div.innerHTML = `
             <input type="text" placeholder="Item name" value="${item.name}" onchange="updateCustomItem('${category}', ${item.id}, 'name', this.value)">
             <input type="number" class="cost-input" placeholder="0.00" value="${item.cost}" step="0.01" min="0" onchange="updateCustomItem('${category}', ${item.id}, 'cost', this.value)">
+            <input type="date" class="date-input" value="${item.date || ''}" onchange="updateCustomItem('${category}', ${item.id}, 'date', this.value)">
             <span class="cost-display">${formatCurrency(item.cost)}</span>
             <button class="remove-item-btn" onclick="removeCustomItem('${category}', ${item.id})">Remove</button>
         `;
@@ -257,6 +263,8 @@ function updateCustomItem(category, id, field, value) {
             item.name = value;
         } else if (field === 'cost') {
             item.cost = parseFloat(value) || 0;
+        } else if (field === 'date') {
+            item.date = value;
         }
     }
     
@@ -267,6 +275,10 @@ function updateCustomItem(category, id, field, value) {
 
 // Remove custom item
 function removeCustomItem(category, id) {
+    if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+        return;
+    }
+    
     switch(category) {
         case 'perPatient':
             budgetData.perPatientCosts.customItems = budgetData.perPatientCosts.customItems.filter(i => i.id !== id);
@@ -415,6 +427,9 @@ function updateAllCalculations() {
     
     // Update progress
     updateProgress();
+    
+    // Update chart
+    updateBudgetChart(totals);
 }
 
 // Format currency
@@ -461,6 +476,10 @@ function addMilestone() {
 
 // Remove milestone
 function removeMilestone(button) {
+    if (!confirm('Are you sure you want to delete this milestone? This action cannot be undone.')) {
+        return;
+    }
+    
     button.parentElement.remove();
     updateAllCalculations();
 }
@@ -729,6 +748,99 @@ function exportToExcel() {
     XLSX.writeFile(wb, `clinical_trial_budget_${budgetData.studyInfo.protocolNumber || 'draft'}_${new Date().toISOString().split('T')[0]}.xlsx`);
 }
 
+// Export to CSV
+function exportToCSV() {
+    const totals = calculateTotals();
+    
+    let csv = 'Clinical Trial Budget Report\n';
+    csv += `Generated on,${new Date().toLocaleDateString()}\n\n`;
+    
+    csv += 'Study Information\n';
+    csv += 'Field,Value\n';
+    csv += `Protocol Number,${budgetData.studyInfo.protocolNumber}\n`;
+    csv += `Study Title,${budgetData.studyInfo.studyTitle}\n`;
+    csv += `Principal Investigator,${budgetData.studyInfo.principalInvestigator}\n`;
+    csv += `Sponsor,${budgetData.studyInfo.sponsor}\n`;
+    csv += `Study Duration (months),${budgetData.studyInfo.studyDuration}\n`;
+    csv += `Expected Enrollment,${budgetData.studyInfo.expectedEnrollment}\n`;
+    csv += `Currency,${budgetData.currency}\n\n`;
+    
+    csv += 'Cost Breakdown\n';
+    csv += 'Category,Item,Unit Cost,Quantity,Date,Total\n';
+    
+    // Per-patient costs
+    csv += `Per-Patient Costs,Screening Visit,${budgetData.perPatientCosts.screeningVisit},1,,${budgetData.perPatientCosts.screeningVisit}\n`;
+    csv += `Per-Patient Costs,Baseline Visit,${budgetData.perPatientCosts.baselineVisit},1,,${budgetData.perPatientCosts.baselineVisit}\n`;
+    csv += `Per-Patient Costs,Follow-up Visit,${budgetData.perPatientCosts.followUpVisit},${budgetData.perPatientCosts.followUpQuantity},,${budgetData.perPatientCosts.followUpVisit * budgetData.perPatientCosts.followUpQuantity}\n`;
+    csv += `Per-Patient Costs,End of Study Visit,${budgetData.perPatientCosts.endOfStudyVisit},1,,${budgetData.perPatientCosts.endOfStudyVisit}\n`;
+    csv += `Per-Patient Costs,Laboratory Tests,${budgetData.perPatientCosts.labTests},1,,${budgetData.perPatientCosts.labTests}\n`;
+    csv += `Per-Patient Costs,Imaging Procedures,${budgetData.perPatientCosts.imagingProcedures},1,,${budgetData.perPatientCosts.imagingProcedures}\n`;
+    csv += `Per-Patient Costs,Patient Stipend,${budgetData.perPatientCosts.patientStipend},1,,${budgetData.perPatientCosts.patientStipend}\n`;
+    
+    // Custom per-patient items
+    budgetData.perPatientCosts.customItems.forEach(item => {
+        csv += `Per-Patient Costs,"${item.name}",${item.cost},1,${item.date || ''},${item.cost}\n`;
+    });
+    
+    // Fixed costs
+    csv += `Fixed Costs,Site Initiation,${budgetData.fixedCosts.siteInitiation},1,,${budgetData.fixedCosts.siteInitiation}\n`;
+    csv += `Fixed Costs,Site Monitoring,${budgetData.fixedCosts.siteMonitoring},1,,${budgetData.fixedCosts.siteMonitoring}\n`;
+    csv += `Fixed Costs,Regulatory Submission,${budgetData.fixedCosts.regulatorySubmission},1,,${budgetData.fixedCosts.regulatorySubmission}\n`;
+    csv += `Fixed Costs,IRB/REB Fees,${budgetData.fixedCosts.irbFees},1,,${budgetData.fixedCosts.irbFees}\n`;
+    csv += `Fixed Costs,Site Close-out,${budgetData.fixedCosts.siteCloseOut},1,,${budgetData.fixedCosts.siteCloseOut}\n`;
+    csv += `Fixed Costs,Data Management,${budgetData.fixedCosts.dataManagement},1,,${budgetData.fixedCosts.dataManagement}\n`;
+    csv += `Fixed Costs,Statistical Analysis,${budgetData.fixedCosts.statisticalAnalysis},1,,${budgetData.fixedCosts.statisticalAnalysis}\n`;
+    
+    // Custom fixed items
+    budgetData.fixedCosts.customItems.forEach(item => {
+        csv += `Fixed Costs,"${item.name}",${item.cost},1,${item.date || ''},${item.cost}\n`;
+    });
+    
+    // Equipment costs
+    csv += `Equipment & Supplies,Study Drug/Device,${budgetData.equipmentCosts.studyDrugDevice},1,,${budgetData.equipmentCosts.studyDrugDevice}\n`;
+    csv += `Equipment & Supplies,Laboratory Supplies,${budgetData.equipmentCosts.laboratorySupplies},1,,${budgetData.equipmentCosts.laboratorySupplies}\n`;
+    csv += `Equipment & Supplies,Equipment Rental,${budgetData.equipmentCosts.equipmentRental},1,,${budgetData.equipmentCosts.equipmentRental}\n`;
+    csv += `Equipment & Supplies,Storage Costs,${budgetData.equipmentCosts.storageCosts},1,,${budgetData.equipmentCosts.storageCosts}\n`;
+    
+    // Custom equipment items
+    budgetData.equipmentCosts.customItems.forEach(item => {
+        csv += `Equipment & Supplies,"${item.name}",${item.cost},1,${item.date || ''},${item.cost}\n`;
+    });
+    
+    // Personnel costs
+    csv += `Personnel,Principal Investigator,${budgetData.personnelCosts.piTime},1,,${budgetData.personnelCosts.piTime}\n`;
+    csv += `Personnel,Research Coordinator,${budgetData.personnelCosts.coordinatorTime},1,,${budgetData.personnelCosts.coordinatorTime}\n`;
+    csv += `Personnel,Data Entry Personnel,${budgetData.personnelCosts.dataEntryTime},1,,${budgetData.personnelCosts.dataEntryTime}\n`;
+    csv += `Personnel,Other Study Staff,${budgetData.personnelCosts.otherStaffTime},1,,${budgetData.personnelCosts.otherStaffTime}\n`;
+    
+    // Custom personnel items
+    budgetData.personnelCosts.customItems.forEach(item => {
+        csv += `Personnel,"${item.name}",${item.cost},1,${item.date || ''},${item.cost}\n`;
+    });
+    
+    csv += '\nSummary\n';
+    csv += 'Category,Amount\n';
+    csv += `Total Per-Patient Cost,${totals.perPatientTotal}\n`;
+    csv += `Number of Patients,${budgetData.studyInfo.expectedEnrollment}\n`;
+    csv += `Total Patient Costs,${totals.perPatientCostsTotal}\n`;
+    csv += `Total Fixed Costs,${totals.fixedTotal}\n`;
+    csv += `Total Equipment Costs,${totals.equipmentTotal}\n`;
+    csv += `Total Personnel Costs,${totals.personnelTotal}\n`;
+    csv += `Subtotal,${totals.subtotal}\n`;
+    csv += `Overhead (${budgetData.overheadPercentage}%),${totals.overheadAmount}\n`;
+    csv += `TOTAL STUDY COST,${totals.totalStudyCost}\n`;
+    csv += `Cost Per Patient (All-in),${totals.allInPerPatient}\n`;
+    
+    // Create and download file
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `clinical_trial_budget_${budgetData.studyInfo.protocolNumber || 'draft'}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
 // Export to Text
 function exportToText() {
     const totals = calculateTotals();
@@ -886,6 +998,155 @@ function clearAll() {
         // Update calculations and save
         updateAllCalculations();
         localStorage.removeItem('clinicalTrialBudget');
+    }
+}
+
+// Filter budget items by category
+function filterBudgetItems() {
+    const selectedCategory = document.getElementById('categoryFilter').value;
+    const budgetSections = document.querySelectorAll('.budget-section');
+    
+    budgetSections.forEach(section => {
+        const sectionTitle = section.querySelector('h2').textContent.toLowerCase();
+        let shouldShow = selectedCategory === 'all';
+        
+        if (!shouldShow) {
+            switch (selectedCategory) {
+                case 'perPatient':
+                    shouldShow = sectionTitle.includes('per-patient');
+                    break;
+                case 'fixed':
+                    shouldShow = sectionTitle.includes('fixed');
+                    break;
+                case 'equipment':
+                    shouldShow = sectionTitle.includes('equipment');
+                    break;
+                case 'personnel':
+                    shouldShow = sectionTitle.includes('personnel');
+                    break;
+            }
+        }
+        
+        section.style.display = shouldShow ? 'block' : 'none';
+    });
+    
+    // Always show study information, summary, and breakdown sections
+    const alwaysShowSections = ['study information', 'budget summary', 'cost breakdown', 'invoice schedule', 'tax & overhead', 'general notes'];
+    budgetSections.forEach(section => {
+        const sectionTitle = section.querySelector('h2').textContent.toLowerCase();
+        if (alwaysShowSections.some(title => sectionTitle.includes(title))) {
+            section.style.display = 'block';
+        }
+    });
+}
+
+// Sort budget items
+function sortBudgetItems() {
+    const sortBy = document.getElementById('sortBy').value;
+    const customLists = document.querySelectorAll('[id$="CustomList"]');
+    
+    customLists.forEach(list => {
+        const items = Array.from(list.children);
+        const category = list.id.replace('CustomList', '');
+        let itemsData;
+        
+        switch (category) {
+            case 'perPatient':
+                itemsData = budgetData.perPatientCosts.customItems;
+                break;
+            case 'fixed':
+                itemsData = budgetData.fixedCosts.customItems;
+                break;
+            case 'equipment':
+                itemsData = budgetData.equipmentCosts.customItems;
+                break;
+            case 'personnel':
+                itemsData = budgetData.personnelCosts.customItems;
+                break;
+            default:
+                return;
+        }
+        
+        // Sort the data
+        itemsData.sort((a, b) => {
+            switch (sortBy) {
+                case 'name':
+                    return a.name.localeCompare(b.name);
+                case 'amount-desc':
+                    return b.cost - a.cost;
+                case 'amount-asc':
+                    return a.cost - b.cost;
+                case 'date-desc':
+                    return new Date(b.date || 0) - new Date(a.date || 0);
+                case 'date-asc':
+                    return new Date(a.date || 0) - new Date(b.date || 0);
+                default:
+                    return 0;
+            }
+        });
+        
+        // Re-render the sorted items
+        renderCustomItems(category, itemsData);
+    });
+}
+
+// Initialize budget chart
+function initializeBudgetChart() {
+    const ctx = document.getElementById('budgetChart').getContext('2d');
+    budgetChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Per-Patient Costs', 'Fixed Study Costs', 'Equipment & Supplies', 'Personnel'],
+            datasets: [{
+                data: [0, 0, 0, 0],
+                backgroundColor: [
+                    '#2563eb', // Blue
+                    '#dc2626', // Red
+                    '#16a34a', // Green
+                    '#ea580c'  // Orange
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label;
+                            const value = formatCurrency(context.raw, false);
+                            const percentage = ((context.raw / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Update budget chart
+function updateBudgetChart(totals) {
+    if (budgetChart && totals.totalStudyCost > 0) {
+        const data = [
+            totals.perPatientCostsTotal,
+            totals.fixedTotal,
+            totals.equipmentTotal,
+            totals.personnelTotal
+        ];
+        
+        budgetChart.data.datasets[0].data = data;
+        budgetChart.update();
     }
 }
 

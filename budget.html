@@ -300,6 +300,24 @@
         <!-- Category Breakdown -->
         <div class="breakdown-section">
             <h2>Cost Breakdown by Category</h2>
+            <div class="filter-controls">
+                <label for="categoryFilter">Filter by Category:</label>
+                <select id="categoryFilter" onchange="filterBudgetItems()">
+                    <option value="all">All Categories</option>
+                    <option value="perPatient">Per-Patient Costs</option>
+                    <option value="fixed">Fixed Study Costs</option>
+                    <option value="equipment">Equipment & Supplies</option>
+                    <option value="personnel">Personnel</option>
+                </select>
+                <label for="sortBy">Sort by:</label>
+                <select id="sortBy" onchange="sortBudgetItems()">
+                    <option value="name">Name</option>
+                    <option value="amount-desc">Amount (High to Low)</option>
+                    <option value="amount-asc">Amount (Low to High)</option>
+                    <option value="date-desc">Date (Newest First)</option>
+                    <option value="date-asc">Date (Oldest First)</option>
+                </select>
+            </div>
             <div class="breakdown-grid">
                 <div class="breakdown-item">
                     <div class="breakdown-label">Per-Patient Costs</div>
@@ -321,6 +339,12 @@
                     <div class="breakdown-value" id="breakdownPersonnel">$0</div>
                     <div class="breakdown-percentage" id="percentPersonnel">0%</div>
                 </div>
+            </div>
+            
+            <!-- Budget Visualization -->
+            <div class="chart-container">
+                <h3>Budget Visualization</h3>
+                <canvas id="budgetChart" width="400" height="200"></canvas>
             </div>
         </div>
 
@@ -358,6 +382,7 @@
             <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="loadFromFile(event)">
             <button class="btn btn-success" onclick="exportToPDF()">Export to PDF</button>
             <button class="btn btn-success" onclick="exportToExcel()">Export to Excel</button>
+            <button class="btn btn-success" onclick="exportToCSV()">Export to CSV</button>
             <button class="btn btn-success" onclick="exportToText()">Export to Text</button>
             <button class="btn btn-warning" onclick="printBudget()">Print Budget</button>
             <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
@@ -402,6 +427,9 @@
 
     <!-- Include SheetJS for Excel export -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- Include Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Budget Calculator JavaScript -->
     <script src="assets/js/budget.js"></script>
