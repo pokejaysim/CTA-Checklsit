@@ -83,45 +83,7 @@
         <div class="budget-section">
             <h2>Per-Patient Costs</h2>
             
-            <h3>Visit Fees</h3>
-            <div class="cost-item">
-                <label for="screeningVisit">Screening Visit</label>
-                <input type="number" id="screeningVisit" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="screeningVisit">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="baselineVisit">Baseline Visit</label>
-                <input type="number" id="baselineVisit" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="baselineVisit">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="followUpVisit">Follow-up Visit</label>
-                <input type="number" id="followUpVisit" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <input type="number" id="followUpQuantity" class="cost-input quantity-input" placeholder="Qty" min="0" value="1">
-                <span class="cost-display" data-cost="followUpTotal">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="endOfStudyVisit">End of Study Visit</label>
-                <input type="number" id="endOfStudyVisit" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="endOfStudyVisit">$0.00</span>
-            </div>
-
-            <h3>Procedures & Compensation</h3>
-            <div class="cost-item">
-                <label for="labTests">Laboratory Tests</label>
-                <input type="number" id="labTests" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="labTests">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="imagingProcedures">Imaging Procedures</label>
-                <input type="number" id="imagingProcedures" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="imagingProcedures">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="patientStipend">Patient Stipend/Compensation</label>
-                <input type="number" id="patientStipend" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="patientStipend">$0.00</span>
-            </div>
+            <div id="perPatientDefaultItems"></div>
 
             <div class="custom-items" id="perPatientCustomItems">
                 <h4>Additional Per-Patient Items</h4>
@@ -139,41 +101,7 @@
         <div class="budget-section">
             <h2>Fixed Study Costs</h2>
             
-            <div class="cost-item">
-                <label for="siteInitiation">Site Initiation Fee</label>
-                <input type="number" id="siteInitiation" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="siteInitiation">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="siteMonitoring">Site Monitoring Fees</label>
-                <input type="number" id="siteMonitoring" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="siteMonitoring">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="regulatorySubmission">Regulatory Submission Fees</label>
-                <input type="number" id="regulatorySubmission" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="regulatorySubmission">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="irbFees">IRB/REB Fees</label>
-                <input type="number" id="irbFees" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="irbFees">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="siteCloseOut">Site Close-out Fee</label>
-                <input type="number" id="siteCloseOut" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="siteCloseOut">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="dataManagement">Data Management Fees</label>
-                <input type="number" id="dataManagement" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="dataManagement">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="statisticalAnalysis">Statistical Analysis Fees</label>
-                <input type="number" id="statisticalAnalysis" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="statisticalAnalysis">$0.00</span>
-            </div>
+            <div id="fixedDefaultItems"></div>
 
             <div class="custom-items" id="fixedCustomItems">
                 <h4>Additional Fixed Items</h4>
@@ -191,26 +119,7 @@
         <div class="budget-section">
             <h2>Equipment & Supply Costs</h2>
             
-            <div class="cost-item">
-                <label for="studyDrugDevice">Study Drug/Device Costs</label>
-                <input type="number" id="studyDrugDevice" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="studyDrugDevice">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="laboratorySupplies">Laboratory Supplies</label>
-                <input type="number" id="laboratorySupplies" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="laboratorySupplies">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="equipmentRental">Medical Equipment Rental</label>
-                <input type="number" id="equipmentRental" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="equipmentRental">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="storageCosts">Storage Costs</label>
-                <input type="number" id="storageCosts" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="storageCosts">$0.00</span>
-            </div>
+            <div id="equipmentDefaultItems"></div>
 
             <div class="custom-items" id="equipmentCustomItems">
                 <h4>Additional Equipment Items</h4>
@@ -228,26 +137,7 @@
         <div class="budget-section">
             <h2>Personnel Costs</h2>
             
-            <div class="cost-item">
-                <label for="piTime">Principal Investigator Time</label>
-                <input type="number" id="piTime" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="piTime">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="coordinatorTime">Research Coordinator Time</label>
-                <input type="number" id="coordinatorTime" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="coordinatorTime">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="dataEntryTime">Data Entry Personnel</label>
-                <input type="number" id="dataEntryTime" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="dataEntryTime">$0.00</span>
-            </div>
-            <div class="cost-item">
-                <label for="otherStaffTime">Other Study Staff</label>
-                <input type="number" id="otherStaffTime" class="cost-input" placeholder="0.00" step="0.01" min="0">
-                <span class="cost-display" data-cost="otherStaffTime">$0.00</span>
-            </div>
+            <div id="personnelDefaultItems"></div>
 
             <div class="custom-items" id="personnelCustomItems">
                 <h4>Additional Personnel Items</h4>

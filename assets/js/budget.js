@@ -12,38 +12,45 @@ let budgetData = {
     },
     currency: 'USD',
     perPatientCosts: {
-        screeningVisit: 0,
-        baselineVisit: 0,
-        followUpVisit: 0,
-        followUpQuantity: 1,
-        endOfStudyVisit: 0,
-        labTests: 0,
-        imagingProcedures: 0,
-        patientStipend: 0,
+        defaultItems: [
+            { id: 'screeningVisit', name: 'Screening Visit', cost: 0, quantity: 1 },
+            { id: 'baselineVisit', name: 'Baseline Visit', cost: 0, quantity: 1 },
+            { id: 'followUpVisit', name: 'Follow-up Visit', cost: 0, quantity: 1 },
+            { id: 'endOfStudyVisit', name: 'End of Study Visit', cost: 0, quantity: 1 },
+            { id: 'labTests', name: 'Laboratory Tests', cost: 0, quantity: 1 },
+            { id: 'imagingProcedures', name: 'Imaging Procedures', cost: 0, quantity: 1 },
+            { id: 'patientStipend', name: 'Patient Stipend/Compensation', cost: 0, quantity: 1 }
+        ],
         customItems: []
     },
     fixedCosts: {
-        siteInitiation: 0,
-        siteMonitoring: 0,
-        regulatorySubmission: 0,
-        irbFees: 0,
-        siteCloseOut: 0,
-        dataManagement: 0,
-        statisticalAnalysis: 0,
+        defaultItems: [
+            { id: 'siteInitiation', name: 'Site Initiation Fee', cost: 0, quantity: 1 },
+            { id: 'siteMonitoring', name: 'Site Monitoring Fees', cost: 0, quantity: 1 },
+            { id: 'regulatorySubmission', name: 'Regulatory Submission Fees', cost: 0, quantity: 1 },
+            { id: 'irbFees', name: 'IRB/REB Fees', cost: 0, quantity: 1 },
+            { id: 'siteCloseOut', name: 'Site Close-out Fee', cost: 0, quantity: 1 },
+            { id: 'dataManagement', name: 'Data Management Fees', cost: 0, quantity: 1 },
+            { id: 'statisticalAnalysis', name: 'Statistical Analysis Fees', cost: 0, quantity: 1 }
+        ],
         customItems: []
     },
     equipmentCosts: {
-        studyDrugDevice: 0,
-        laboratorySupplies: 0,
-        equipmentRental: 0,
-        storageCosts: 0,
+        defaultItems: [
+            { id: 'studyDrugDevice', name: 'Study Drug/Device Costs', cost: 0, quantity: 1 },
+            { id: 'laboratorySupplies', name: 'Laboratory Supplies', cost: 0, quantity: 1 },
+            { id: 'equipmentRental', name: 'Medical Equipment Rental', cost: 0, quantity: 1 },
+            { id: 'storageCosts', name: 'Storage Costs', cost: 0, quantity: 1 }
+        ],
         customItems: []
     },
     personnelCosts: {
-        piTime: 0,
-        coordinatorTime: 0,
-        dataEntryTime: 0,
-        otherStaffTime: 0,
+        defaultItems: [
+            { id: 'piTime', name: 'Principal Investigator Time', cost: 0, quantity: 1 },
+            { id: 'coordinatorTime', name: 'Research Coordinator Time', cost: 0, quantity: 1 },
+            { id: 'dataEntryTime', name: 'Data Entry Personnel', cost: 0, quantity: 1 },
+            { id: 'otherStaffTime', name: 'Other Study Staff', cost: 0, quantity: 1 }
+        ],
         customItems: []
     },
     overheadPercentage: 0,
@@ -77,6 +84,7 @@ let budgetChart = null;
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     loadFromLocalStorage();
+    renderAllDefaultItems();
     updateAllCalculations();
     initializeBudgetChart();
 });
@@ -94,11 +102,7 @@ function setupEventListeners() {
     // Currency selector
     document.getElementById('currency').addEventListener('change', updateCurrency);
     
-    // Cost inputs
-    const costInputs = document.querySelectorAll('.cost-input');
-    costInputs.forEach(input => {
-        input.addEventListener('input', updateCosts);
-    });
+    // Cost inputs are now handled dynamically in renderDefaultItems
     
     // Notes
     document.getElementById('perPatientNotes').addEventListener('input', updateNotes);
@@ -132,42 +136,7 @@ function updateCurrency() {
     saveToLocalStorage();
 }
 
-// Update costs
-function updateCosts() {
-    // Per-patient costs
-    budgetData.perPatientCosts.screeningVisit = parseFloat(document.getElementById('screeningVisit').value) || 0;
-    budgetData.perPatientCosts.baselineVisit = parseFloat(document.getElementById('baselineVisit').value) || 0;
-    budgetData.perPatientCosts.followUpVisit = parseFloat(document.getElementById('followUpVisit').value) || 0;
-    budgetData.perPatientCosts.followUpQuantity = parseInt(document.getElementById('followUpQuantity').value) || 1;
-    budgetData.perPatientCosts.endOfStudyVisit = parseFloat(document.getElementById('endOfStudyVisit').value) || 0;
-    budgetData.perPatientCosts.labTests = parseFloat(document.getElementById('labTests').value) || 0;
-    budgetData.perPatientCosts.imagingProcedures = parseFloat(document.getElementById('imagingProcedures').value) || 0;
-    budgetData.perPatientCosts.patientStipend = parseFloat(document.getElementById('patientStipend').value) || 0;
-    
-    // Fixed costs
-    budgetData.fixedCosts.siteInitiation = parseFloat(document.getElementById('siteInitiation').value) || 0;
-    budgetData.fixedCosts.siteMonitoring = parseFloat(document.getElementById('siteMonitoring').value) || 0;
-    budgetData.fixedCosts.regulatorySubmission = parseFloat(document.getElementById('regulatorySubmission').value) || 0;
-    budgetData.fixedCosts.irbFees = parseFloat(document.getElementById('irbFees').value) || 0;
-    budgetData.fixedCosts.siteCloseOut = parseFloat(document.getElementById('siteCloseOut').value) || 0;
-    budgetData.fixedCosts.dataManagement = parseFloat(document.getElementById('dataManagement').value) || 0;
-    budgetData.fixedCosts.statisticalAnalysis = parseFloat(document.getElementById('statisticalAnalysis').value) || 0;
-    
-    // Equipment costs
-    budgetData.equipmentCosts.studyDrugDevice = parseFloat(document.getElementById('studyDrugDevice').value) || 0;
-    budgetData.equipmentCosts.laboratorySupplies = parseFloat(document.getElementById('laboratorySupplies').value) || 0;
-    budgetData.equipmentCosts.equipmentRental = parseFloat(document.getElementById('equipmentRental').value) || 0;
-    budgetData.equipmentCosts.storageCosts = parseFloat(document.getElementById('storageCosts').value) || 0;
-    
-    // Personnel costs
-    budgetData.personnelCosts.piTime = parseFloat(document.getElementById('piTime').value) || 0;
-    budgetData.personnelCosts.coordinatorTime = parseFloat(document.getElementById('coordinatorTime').value) || 0;
-    budgetData.personnelCosts.dataEntryTime = parseFloat(document.getElementById('dataEntryTime').value) || 0;
-    budgetData.personnelCosts.otherStaffTime = parseFloat(document.getElementById('otherStaffTime').value) || 0;
-    
-    updateAllCalculations();
-    saveToLocalStorage();
-}
+// This function is no longer needed as we handle updates in updateDefaultItem
 
 // Update notes
 function updateNotes() {
@@ -213,6 +182,100 @@ function addCustomItem(category) {
         case 'personnel':
             budgetData.personnelCosts.customItems.push(item);
             renderCustomItems('personnel', budgetData.personnelCosts.customItems);
+            break;
+    }
+    
+    updateAllCalculations();
+    saveToLocalStorage();
+}
+
+// Render all default items
+function renderAllDefaultItems() {
+    renderDefaultItems('perPatient', budgetData.perPatientCosts.defaultItems);
+    renderDefaultItems('fixed', budgetData.fixedCosts.defaultItems);
+    renderDefaultItems('equipment', budgetData.equipmentCosts.defaultItems);
+    renderDefaultItems('personnel', budgetData.personnelCosts.defaultItems);
+}
+
+// Render default items
+function renderDefaultItems(category, items) {
+    const container = document.getElementById(`${category}DefaultItems`);
+    container.innerHTML = '';
+    
+    items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'cost-item';
+        
+        let quantityInput = '';
+        if (item.id === 'followUpVisit') {
+            quantityInput = `<input type="number" id="${item.id}Quantity" class="cost-input quantity-input" placeholder="Qty" min="0" value="${item.quantity}" onchange="updateDefaultItem('${category}', '${item.id}', 'quantity', this.value)">`;
+        }
+        
+        div.innerHTML = `
+            <label>${item.name}</label>
+            <input type="number" id="${item.id}" class="cost-input" placeholder="0.00" value="${item.cost || ''}" step="0.01" min="0" onchange="updateDefaultItem('${category}', '${item.id}', 'cost', this.value)">
+            ${quantityInput}
+            <span class="cost-display">${formatCurrency(item.cost * item.quantity)}</span>
+            <button class="remove-item-btn" onclick="removeDefaultItem('${category}', '${item.id}')">Remove</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// Update default item
+function updateDefaultItem(category, id, field, value) {
+    let items;
+    switch(category) {
+        case 'perPatient':
+            items = budgetData.perPatientCosts.defaultItems;
+            break;
+        case 'fixed':
+            items = budgetData.fixedCosts.defaultItems;
+            break;
+        case 'equipment':
+            items = budgetData.equipmentCosts.defaultItems;
+            break;
+        case 'personnel':
+            items = budgetData.personnelCosts.defaultItems;
+            break;
+    }
+    
+    const item = items.find(i => i.id === id);
+    if (item) {
+        if (field === 'cost') {
+            item.cost = parseFloat(value) || 0;
+        } else if (field === 'quantity') {
+            item.quantity = parseInt(value) || 1;
+        }
+    }
+    
+    renderDefaultItems(category, items);
+    updateAllCalculations();
+    saveToLocalStorage();
+}
+
+// Remove default item
+function removeDefaultItem(category, id) {
+    if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+        return;
+    }
+    
+    switch(category) {
+        case 'perPatient':
+            budgetData.perPatientCosts.defaultItems = budgetData.perPatientCosts.defaultItems.filter(i => i.id !== id);
+            renderDefaultItems('perPatient', budgetData.perPatientCosts.defaultItems);
+            break;
+        case 'fixed':
+            budgetData.fixedCosts.defaultItems = budgetData.fixedCosts.defaultItems.filter(i => i.id !== id);
+            renderDefaultItems('fixed', budgetData.fixedCosts.defaultItems);
+            break;
+        case 'equipment':
+            budgetData.equipmentCosts.defaultItems = budgetData.equipmentCosts.defaultItems.filter(i => i.id !== id);
+            renderDefaultItems('equipment', budgetData.equipmentCosts.defaultItems);
+            break;
+        case 'personnel':
+            budgetData.personnelCosts.defaultItems = budgetData.personnelCosts.defaultItems.filter(i => i.id !== id);
+            renderDefaultItems('personnel', budgetData.personnelCosts.defaultItems);
             break;
     }
     
@@ -306,40 +369,22 @@ function removeCustomItem(category, id) {
 function calculateTotals() {
     // Per-patient total
     const perPatientTotal = 
-        budgetData.perPatientCosts.screeningVisit +
-        budgetData.perPatientCosts.baselineVisit +
-        (budgetData.perPatientCosts.followUpVisit * budgetData.perPatientCosts.followUpQuantity) +
-        budgetData.perPatientCosts.endOfStudyVisit +
-        budgetData.perPatientCosts.labTests +
-        budgetData.perPatientCosts.imagingProcedures +
-        budgetData.perPatientCosts.patientStipend +
+        budgetData.perPatientCosts.defaultItems.reduce((sum, item) => sum + (item.cost * item.quantity), 0) +
         budgetData.perPatientCosts.customItems.reduce((sum, item) => sum + item.cost, 0);
     
     // Fixed total
     const fixedTotal = 
-        budgetData.fixedCosts.siteInitiation +
-        budgetData.fixedCosts.siteMonitoring +
-        budgetData.fixedCosts.regulatorySubmission +
-        budgetData.fixedCosts.irbFees +
-        budgetData.fixedCosts.siteCloseOut +
-        budgetData.fixedCosts.dataManagement +
-        budgetData.fixedCosts.statisticalAnalysis +
+        budgetData.fixedCosts.defaultItems.reduce((sum, item) => sum + (item.cost * item.quantity), 0) +
         budgetData.fixedCosts.customItems.reduce((sum, item) => sum + item.cost, 0);
     
     // Equipment total
     const equipmentTotal = 
-        budgetData.equipmentCosts.studyDrugDevice +
-        budgetData.equipmentCosts.laboratorySupplies +
-        budgetData.equipmentCosts.equipmentRental +
-        budgetData.equipmentCosts.storageCosts +
+        budgetData.equipmentCosts.defaultItems.reduce((sum, item) => sum + (item.cost * item.quantity), 0) +
         budgetData.equipmentCosts.customItems.reduce((sum, item) => sum + item.cost, 0);
     
     // Personnel total
     const personnelTotal = 
-        budgetData.personnelCosts.piTime +
-        budgetData.personnelCosts.coordinatorTime +
-        budgetData.personnelCosts.dataEntryTime +
-        budgetData.personnelCosts.otherStaffTime +
+        budgetData.personnelCosts.defaultItems.reduce((sum, item) => sum + (item.cost * item.quantity), 0) +
         budgetData.personnelCosts.customItems.reduce((sum, item) => sum + item.cost, 0);
     
     // Calculate subtotal and overhead
@@ -366,38 +411,7 @@ function updateAllCalculations() {
     const totals = calculateTotals();
     const symbol = currencySymbols[budgetData.currency];
     
-    // Update individual cost displays
-    document.querySelectorAll('.cost-display').forEach(display => {
-        const costType = display.getAttribute('data-cost');
-        if (costType) {
-            let value = 0;
-            switch(costType) {
-                case 'screeningVisit': value = budgetData.perPatientCosts.screeningVisit; break;
-                case 'baselineVisit': value = budgetData.perPatientCosts.baselineVisit; break;
-                case 'followUpTotal': value = budgetData.perPatientCosts.followUpVisit * budgetData.perPatientCosts.followUpQuantity; break;
-                case 'endOfStudyVisit': value = budgetData.perPatientCosts.endOfStudyVisit; break;
-                case 'labTests': value = budgetData.perPatientCosts.labTests; break;
-                case 'imagingProcedures': value = budgetData.perPatientCosts.imagingProcedures; break;
-                case 'patientStipend': value = budgetData.perPatientCosts.patientStipend; break;
-                case 'siteInitiation': value = budgetData.fixedCosts.siteInitiation; break;
-                case 'siteMonitoring': value = budgetData.fixedCosts.siteMonitoring; break;
-                case 'regulatorySubmission': value = budgetData.fixedCosts.regulatorySubmission; break;
-                case 'irbFees': value = budgetData.fixedCosts.irbFees; break;
-                case 'siteCloseOut': value = budgetData.fixedCosts.siteCloseOut; break;
-                case 'dataManagement': value = budgetData.fixedCosts.dataManagement; break;
-                case 'statisticalAnalysis': value = budgetData.fixedCosts.statisticalAnalysis; break;
-                case 'studyDrugDevice': value = budgetData.equipmentCosts.studyDrugDevice; break;
-                case 'laboratorySupplies': value = budgetData.equipmentCosts.laboratorySupplies; break;
-                case 'equipmentRental': value = budgetData.equipmentCosts.equipmentRental; break;
-                case 'storageCosts': value = budgetData.equipmentCosts.storageCosts; break;
-                case 'piTime': value = budgetData.personnelCosts.piTime; break;
-                case 'coordinatorTime': value = budgetData.personnelCosts.coordinatorTime; break;
-                case 'dataEntryTime': value = budgetData.personnelCosts.dataEntryTime; break;
-                case 'otherStaffTime': value = budgetData.personnelCosts.otherStaffTime; break;
-            }
-            display.textContent = formatCurrency(value);
-        }
-    });
+    // Cost displays are now updated in renderDefaultItems
     
     // Update overhead
     document.getElementById('overheadAmount').textContent = formatCurrency(totals.overheadAmount);
@@ -520,7 +534,69 @@ function loadFromLocalStorage() {
     const saved = localStorage.getItem('clinicalTrialBudget');
     if (saved) {
         budgetData = JSON.parse(saved);
+        migrateOldDataStructure();
         populateForm();
+    }
+}
+
+// Migrate old data structure to new format
+function migrateOldDataStructure() {
+    // Check if we have old structure and migrate to new
+    if (budgetData.perPatientCosts && !budgetData.perPatientCosts.defaultItems) {
+        const oldData = { ...budgetData };
+        
+        // Migrate per-patient costs
+        budgetData.perPatientCosts = {
+            defaultItems: [
+                { id: 'screeningVisit', name: 'Screening Visit', cost: oldData.perPatientCosts.screeningVisit || 0, quantity: 1 },
+                { id: 'baselineVisit', name: 'Baseline Visit', cost: oldData.perPatientCosts.baselineVisit || 0, quantity: 1 },
+                { id: 'followUpVisit', name: 'Follow-up Visit', cost: oldData.perPatientCosts.followUpVisit || 0, quantity: oldData.perPatientCosts.followUpQuantity || 1 },
+                { id: 'endOfStudyVisit', name: 'End of Study Visit', cost: oldData.perPatientCosts.endOfStudyVisit || 0, quantity: 1 },
+                { id: 'labTests', name: 'Laboratory Tests', cost: oldData.perPatientCosts.labTests || 0, quantity: 1 },
+                { id: 'imagingProcedures', name: 'Imaging Procedures', cost: oldData.perPatientCosts.imagingProcedures || 0, quantity: 1 },
+                { id: 'patientStipend', name: 'Patient Stipend/Compensation', cost: oldData.perPatientCosts.patientStipend || 0, quantity: 1 }
+            ],
+            customItems: oldData.perPatientCosts.customItems || []
+        };
+        
+        // Migrate fixed costs
+        budgetData.fixedCosts = {
+            defaultItems: [
+                { id: 'siteInitiation', name: 'Site Initiation Fee', cost: oldData.fixedCosts.siteInitiation || 0, quantity: 1 },
+                { id: 'siteMonitoring', name: 'Site Monitoring Fees', cost: oldData.fixedCosts.siteMonitoring || 0, quantity: 1 },
+                { id: 'regulatorySubmission', name: 'Regulatory Submission Fees', cost: oldData.fixedCosts.regulatorySubmission || 0, quantity: 1 },
+                { id: 'irbFees', name: 'IRB/REB Fees', cost: oldData.fixedCosts.irbFees || 0, quantity: 1 },
+                { id: 'siteCloseOut', name: 'Site Close-out Fee', cost: oldData.fixedCosts.siteCloseOut || 0, quantity: 1 },
+                { id: 'dataManagement', name: 'Data Management Fees', cost: oldData.fixedCosts.dataManagement || 0, quantity: 1 },
+                { id: 'statisticalAnalysis', name: 'Statistical Analysis Fees', cost: oldData.fixedCosts.statisticalAnalysis || 0, quantity: 1 }
+            ],
+            customItems: oldData.fixedCosts.customItems || []
+        };
+        
+        // Migrate equipment costs
+        budgetData.equipmentCosts = {
+            defaultItems: [
+                { id: 'studyDrugDevice', name: 'Study Drug/Device Costs', cost: oldData.equipmentCosts.studyDrugDevice || 0, quantity: 1 },
+                { id: 'laboratorySupplies', name: 'Laboratory Supplies', cost: oldData.equipmentCosts.laboratorySupplies || 0, quantity: 1 },
+                { id: 'equipmentRental', name: 'Medical Equipment Rental', cost: oldData.equipmentCosts.equipmentRental || 0, quantity: 1 },
+                { id: 'storageCosts', name: 'Storage Costs', cost: oldData.equipmentCosts.storageCosts || 0, quantity: 1 }
+            ],
+            customItems: oldData.equipmentCosts.customItems || []
+        };
+        
+        // Migrate personnel costs
+        budgetData.personnelCosts = {
+            defaultItems: [
+                { id: 'piTime', name: 'Principal Investigator Time', cost: oldData.personnelCosts.piTime || 0, quantity: 1 },
+                { id: 'coordinatorTime', name: 'Research Coordinator Time', cost: oldData.personnelCosts.coordinatorTime || 0, quantity: 1 },
+                { id: 'dataEntryTime', name: 'Data Entry Personnel', cost: oldData.personnelCosts.dataEntryTime || 0, quantity: 1 },
+                { id: 'otherStaffTime', name: 'Other Study Staff', cost: oldData.personnelCosts.otherStaffTime || 0, quantity: 1 }
+            ],
+            customItems: oldData.personnelCosts.customItems || []
+        };
+        
+        // Save the migrated data
+        saveToLocalStorage();
     }
 }
 
@@ -537,37 +613,6 @@ function populateForm() {
     // Currency
     document.getElementById('currency').value = budgetData.currency || 'USD';
     
-    // Per-patient costs
-    document.getElementById('screeningVisit').value = budgetData.perPatientCosts.screeningVisit || '';
-    document.getElementById('baselineVisit').value = budgetData.perPatientCosts.baselineVisit || '';
-    document.getElementById('followUpVisit').value = budgetData.perPatientCosts.followUpVisit || '';
-    document.getElementById('followUpQuantity').value = budgetData.perPatientCosts.followUpQuantity || 1;
-    document.getElementById('endOfStudyVisit').value = budgetData.perPatientCosts.endOfStudyVisit || '';
-    document.getElementById('labTests').value = budgetData.perPatientCosts.labTests || '';
-    document.getElementById('imagingProcedures').value = budgetData.perPatientCosts.imagingProcedures || '';
-    document.getElementById('patientStipend').value = budgetData.perPatientCosts.patientStipend || '';
-    
-    // Fixed costs
-    document.getElementById('siteInitiation').value = budgetData.fixedCosts.siteInitiation || '';
-    document.getElementById('siteMonitoring').value = budgetData.fixedCosts.siteMonitoring || '';
-    document.getElementById('regulatorySubmission').value = budgetData.fixedCosts.regulatorySubmission || '';
-    document.getElementById('irbFees').value = budgetData.fixedCosts.irbFees || '';
-    document.getElementById('siteCloseOut').value = budgetData.fixedCosts.siteCloseOut || '';
-    document.getElementById('dataManagement').value = budgetData.fixedCosts.dataManagement || '';
-    document.getElementById('statisticalAnalysis').value = budgetData.fixedCosts.statisticalAnalysis || '';
-    
-    // Equipment costs
-    document.getElementById('studyDrugDevice').value = budgetData.equipmentCosts.studyDrugDevice || '';
-    document.getElementById('laboratorySupplies').value = budgetData.equipmentCosts.laboratorySupplies || '';
-    document.getElementById('equipmentRental').value = budgetData.equipmentCosts.equipmentRental || '';
-    document.getElementById('storageCosts').value = budgetData.equipmentCosts.storageCosts || '';
-    
-    // Personnel costs
-    document.getElementById('piTime').value = budgetData.personnelCosts.piTime || '';
-    document.getElementById('coordinatorTime').value = budgetData.personnelCosts.coordinatorTime || '';
-    document.getElementById('dataEntryTime').value = budgetData.personnelCosts.dataEntryTime || '';
-    document.getElementById('otherStaffTime').value = budgetData.personnelCosts.otherStaffTime || '';
-    
     // Overhead
     document.getElementById('overheadPercentage').value = budgetData.overheadPercentage || '';
     
@@ -578,7 +623,8 @@ function populateForm() {
     document.getElementById('personnelNotes').value = budgetData.notes.personnel || '';
     document.getElementById('generalNotes').value = budgetData.notes.general || '';
     
-    // Custom items
+    // Render all items
+    renderAllDefaultItems();
     renderCustomItems('perPatient', budgetData.perPatientCosts.customItems);
     renderCustomItems('fixed', budgetData.fixedCosts.customItems);
     renderCustomItems('equipment', budgetData.equipmentCosts.customItems);
@@ -769,13 +815,9 @@ function exportToCSV() {
     csv += 'Category,Item,Unit Cost,Quantity,Date,Total\n';
     
     // Per-patient costs
-    csv += `Per-Patient Costs,Screening Visit,${budgetData.perPatientCosts.screeningVisit},1,,${budgetData.perPatientCosts.screeningVisit}\n`;
-    csv += `Per-Patient Costs,Baseline Visit,${budgetData.perPatientCosts.baselineVisit},1,,${budgetData.perPatientCosts.baselineVisit}\n`;
-    csv += `Per-Patient Costs,Follow-up Visit,${budgetData.perPatientCosts.followUpVisit},${budgetData.perPatientCosts.followUpQuantity},,${budgetData.perPatientCosts.followUpVisit * budgetData.perPatientCosts.followUpQuantity}\n`;
-    csv += `Per-Patient Costs,End of Study Visit,${budgetData.perPatientCosts.endOfStudyVisit},1,,${budgetData.perPatientCosts.endOfStudyVisit}\n`;
-    csv += `Per-Patient Costs,Laboratory Tests,${budgetData.perPatientCosts.labTests},1,,${budgetData.perPatientCosts.labTests}\n`;
-    csv += `Per-Patient Costs,Imaging Procedures,${budgetData.perPatientCosts.imagingProcedures},1,,${budgetData.perPatientCosts.imagingProcedures}\n`;
-    csv += `Per-Patient Costs,Patient Stipend,${budgetData.perPatientCosts.patientStipend},1,,${budgetData.perPatientCosts.patientStipend}\n`;
+    budgetData.perPatientCosts.defaultItems.forEach(item => {
+        csv += `Per-Patient Costs,"${item.name}",${item.cost},${item.quantity},,${item.cost * item.quantity}\n`;
+    });
     
     // Custom per-patient items
     budgetData.perPatientCosts.customItems.forEach(item => {
@@ -783,13 +825,9 @@ function exportToCSV() {
     });
     
     // Fixed costs
-    csv += `Fixed Costs,Site Initiation,${budgetData.fixedCosts.siteInitiation},1,,${budgetData.fixedCosts.siteInitiation}\n`;
-    csv += `Fixed Costs,Site Monitoring,${budgetData.fixedCosts.siteMonitoring},1,,${budgetData.fixedCosts.siteMonitoring}\n`;
-    csv += `Fixed Costs,Regulatory Submission,${budgetData.fixedCosts.regulatorySubmission},1,,${budgetData.fixedCosts.regulatorySubmission}\n`;
-    csv += `Fixed Costs,IRB/REB Fees,${budgetData.fixedCosts.irbFees},1,,${budgetData.fixedCosts.irbFees}\n`;
-    csv += `Fixed Costs,Site Close-out,${budgetData.fixedCosts.siteCloseOut},1,,${budgetData.fixedCosts.siteCloseOut}\n`;
-    csv += `Fixed Costs,Data Management,${budgetData.fixedCosts.dataManagement},1,,${budgetData.fixedCosts.dataManagement}\n`;
-    csv += `Fixed Costs,Statistical Analysis,${budgetData.fixedCosts.statisticalAnalysis},1,,${budgetData.fixedCosts.statisticalAnalysis}\n`;
+    budgetData.fixedCosts.defaultItems.forEach(item => {
+        csv += `Fixed Costs,"${item.name}",${item.cost},${item.quantity},,${item.cost * item.quantity}\n`;
+    });
     
     // Custom fixed items
     budgetData.fixedCosts.customItems.forEach(item => {
@@ -797,10 +835,9 @@ function exportToCSV() {
     });
     
     // Equipment costs
-    csv += `Equipment & Supplies,Study Drug/Device,${budgetData.equipmentCosts.studyDrugDevice},1,,${budgetData.equipmentCosts.studyDrugDevice}\n`;
-    csv += `Equipment & Supplies,Laboratory Supplies,${budgetData.equipmentCosts.laboratorySupplies},1,,${budgetData.equipmentCosts.laboratorySupplies}\n`;
-    csv += `Equipment & Supplies,Equipment Rental,${budgetData.equipmentCosts.equipmentRental},1,,${budgetData.equipmentCosts.equipmentRental}\n`;
-    csv += `Equipment & Supplies,Storage Costs,${budgetData.equipmentCosts.storageCosts},1,,${budgetData.equipmentCosts.storageCosts}\n`;
+    budgetData.equipmentCosts.defaultItems.forEach(item => {
+        csv += `Equipment & Supplies,"${item.name}",${item.cost},${item.quantity},,${item.cost * item.quantity}\n`;
+    });
     
     // Custom equipment items
     budgetData.equipmentCosts.customItems.forEach(item => {
@@ -808,10 +845,9 @@ function exportToCSV() {
     });
     
     // Personnel costs
-    csv += `Personnel,Principal Investigator,${budgetData.personnelCosts.piTime},1,,${budgetData.personnelCosts.piTime}\n`;
-    csv += `Personnel,Research Coordinator,${budgetData.personnelCosts.coordinatorTime},1,,${budgetData.personnelCosts.coordinatorTime}\n`;
-    csv += `Personnel,Data Entry Personnel,${budgetData.personnelCosts.dataEntryTime},1,,${budgetData.personnelCosts.dataEntryTime}\n`;
-    csv += `Personnel,Other Study Staff,${budgetData.personnelCosts.otherStaffTime},1,,${budgetData.personnelCosts.otherStaffTime}\n`;
+    budgetData.personnelCosts.defaultItems.forEach(item => {
+        csv += `Personnel,"${item.name}",${item.cost},${item.quantity},,${item.cost * item.quantity}\n`;
+    });
     
     // Custom personnel items
     budgetData.personnelCosts.customItems.forEach(item => {
@@ -908,38 +944,45 @@ function clearAll() {
             },
             currency: 'USD',
             perPatientCosts: {
-                screeningVisit: 0,
-                baselineVisit: 0,
-                followUpVisit: 0,
-                followUpQuantity: 1,
-                endOfStudyVisit: 0,
-                labTests: 0,
-                imagingProcedures: 0,
-                patientStipend: 0,
+                defaultItems: [
+                    { id: 'screeningVisit', name: 'Screening Visit', cost: 0, quantity: 1 },
+                    { id: 'baselineVisit', name: 'Baseline Visit', cost: 0, quantity: 1 },
+                    { id: 'followUpVisit', name: 'Follow-up Visit', cost: 0, quantity: 1 },
+                    { id: 'endOfStudyVisit', name: 'End of Study Visit', cost: 0, quantity: 1 },
+                    { id: 'labTests', name: 'Laboratory Tests', cost: 0, quantity: 1 },
+                    { id: 'imagingProcedures', name: 'Imaging Procedures', cost: 0, quantity: 1 },
+                    { id: 'patientStipend', name: 'Patient Stipend/Compensation', cost: 0, quantity: 1 }
+                ],
                 customItems: []
             },
             fixedCosts: {
-                siteInitiation: 0,
-                siteMonitoring: 0,
-                regulatorySubmission: 0,
-                irbFees: 0,
-                siteCloseOut: 0,
-                dataManagement: 0,
-                statisticalAnalysis: 0,
+                defaultItems: [
+                    { id: 'siteInitiation', name: 'Site Initiation Fee', cost: 0, quantity: 1 },
+                    { id: 'siteMonitoring', name: 'Site Monitoring Fees', cost: 0, quantity: 1 },
+                    { id: 'regulatorySubmission', name: 'Regulatory Submission Fees', cost: 0, quantity: 1 },
+                    { id: 'irbFees', name: 'IRB/REB Fees', cost: 0, quantity: 1 },
+                    { id: 'siteCloseOut', name: 'Site Close-out Fee', cost: 0, quantity: 1 },
+                    { id: 'dataManagement', name: 'Data Management Fees', cost: 0, quantity: 1 },
+                    { id: 'statisticalAnalysis', name: 'Statistical Analysis Fees', cost: 0, quantity: 1 }
+                ],
                 customItems: []
             },
             equipmentCosts: {
-                studyDrugDevice: 0,
-                laboratorySupplies: 0,
-                equipmentRental: 0,
-                storageCosts: 0,
+                defaultItems: [
+                    { id: 'studyDrugDevice', name: 'Study Drug/Device Costs', cost: 0, quantity: 1 },
+                    { id: 'laboratorySupplies', name: 'Laboratory Supplies', cost: 0, quantity: 1 },
+                    { id: 'equipmentRental', name: 'Medical Equipment Rental', cost: 0, quantity: 1 },
+                    { id: 'storageCosts', name: 'Storage Costs', cost: 0, quantity: 1 }
+                ],
                 customItems: []
             },
             personnelCosts: {
-                piTime: 0,
-                coordinatorTime: 0,
-                dataEntryTime: 0,
-                otherStaffTime: 0,
+                defaultItems: [
+                    { id: 'piTime', name: 'Principal Investigator Time', cost: 0, quantity: 1 },
+                    { id: 'coordinatorTime', name: 'Research Coordinator Time', cost: 0, quantity: 1 },
+                    { id: 'dataEntryTime', name: 'Data Entry Personnel', cost: 0, quantity: 1 },
+                    { id: 'otherStaffTime', name: 'Other Study Staff', cost: 0, quantity: 1 }
+                ],
                 customItems: []
             },
             overheadPercentage: 0,
@@ -959,11 +1002,8 @@ function clearAll() {
         
         // Clear form
         document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(input => {
-            if (input.id !== 'followUpQuantity') {
-                input.value = '';
-            }
+            input.value = '';
         });
-        document.getElementById('followUpQuantity').value = 1;
         document.getElementById('currency').value = 'USD';
         
         // Clear custom items
@@ -994,6 +1034,9 @@ function clearAll() {
                 <button class="remove-item-btn" onclick="removeMilestone(this)">Remove</button>
             </div>
         `;
+        
+        // Re-render all items
+        renderAllDefaultItems();
         
         // Update calculations and save
         updateAllCalculations();
