@@ -1,0 +1,212 @@
+/* Landing Page Specific Styles */
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    color: white;
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.hero h1 {
+    color: white;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.hero p {
+    font-size: 1.25rem;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    opacity: 0.95;
+}
+
+/* Tool Cards Grid */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.tool-card {
+    background: white;
+    border-radius: 8px;
+    padding: 2.5rem;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+}
+
+.tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+}
+
+.tool-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary-blue);
+}
+
+.tool-card p {
+    color: var(--medium-gray);
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
+}
+
+.tool-card .icon {
+    font-size: 3rem;
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.tool-card .btn {
+    width: 100%;
+}
+
+/* Features Section */
+.features {
+    background-color: white;
+    padding: 4rem 0;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 3rem;
+    margin-top: 3rem;
+}
+
+.feature {
+    text-align: center;
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+    background-color: var(--light-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--primary-blue);
+}
+
+.feature h4 {
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+}
+
+.feature p {
+    color: var(--medium-gray);
+    font-size: 0.95rem;
+}
+
+/* About Section */
+.about {
+    background-color: var(--light-gray);
+    padding: 4rem 0;
+}
+
+.about-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.about h2 {
+    margin-bottom: 2rem;
+}
+
+.about p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--medium-gray);
+}
+
+/* Call to Action */
+.cta {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    color: white;
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.cta h2 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.cta p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+}
+
+.cta .btn {
+    background-color: white;
+    color: var(--primary-blue);
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.cta .btn:hover {
+    background-color: var(--light-gray);
+    transform: translateY(-2px);
+}
+
+/* Coming Soon Badge */
+.coming-soon {
+    display: inline-block;
+    background-color: var(--warning-yellow);
+    color: var(--dark-gray);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
+    
+    .hero p {
+        font-size: 1.1rem;
+    }
+    
+    .tools-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .tool-card {
+        padding: 2rem;
+    }
+}

@@ -3,665 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinical Trial Agreement Checklist - Sponsor-Initiated</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Clinical Trial Management Suite</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/landing.css">
 </head>
 <body>
-    <div class="header">
-        <h1>Clinical Trial Agreement Checklist – Sponsor-Initiated</h1>
-        <p>Version Date: November 12, 2024</p>
-    </div>
-    
-    <div class="main-container">
-        <!-- Study Information Section -->
-        <div class="section study-info-section">
-            <div class="section-title">Study Information</div>
-            <div class="study-grid">
-                <div>
-                    <label class="study-input-label">Protocol Number:</label>
-                    <input type="text" id="protocol-number" class="study-input-field" placeholder="Enter protocol number...">
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <h1>Clinical Trial Management Suite</h1>
+            <nav>
+                <ul>
+                    <li><a href="#tools">Tools</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Streamline Your Clinical Trials</h1>
+            <p>Comprehensive tools for managing clinical trial agreements, budgets, and documentation with precision and efficiency.</p>
+            <a href="#tools" class="btn btn-primary">Explore Our Tools</a>
+        </div>
+    </section>
+
+    <!-- Tools Section -->
+    <section id="tools" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Clinical Trial Management Tools</h2>
+                <p>Professional tools designed for research coordinators, investigators, and trial sponsors</p>
+            </div>
+            
+            <div class="tools-grid">
+                <!-- CTA Checklist Tool -->
+                <div class="tool-card">
+                    <span class="icon">📋</span>
+                    <h3>Clinical Trial Agreement Checklist</h3>
+                    <p>Ensure comprehensive review of all clinical trial agreement components with our interactive checklist. Track progress, add notes, and never miss critical contract elements.</p>
+                    <a href="cta-checklist.html" class="btn btn-primary">Launch Checklist</a>
                 </div>
-                <div>
-                    <label style="font-weight: bold; color: #00669b; display: block; margin-bottom: 5px;">Date:</label>
-                    <input type="date" id="study-date" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+
+                <!-- Budget Calculator Tool -->
+                <div class="tool-card">
+                    <span class="icon">💰</span>
+                    <h3>Budget Calculator</h3>
+                    <p>Calculate and track clinical trial costs with our comprehensive budget tool. Manage per-patient costs, fixed expenses, equipment, and personnel with real-time calculations.</p>
+                    <a href="budget.html" class="btn btn-primary">Launch Calculator</a>
                 </div>
-                <div>
-                    <label style="font-weight: bold; color: #00669b; display: block; margin-bottom: 5px;">Principal Investigator (PI) Name:</label>
-                    <input type="text" id="pi-name" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" placeholder="Enter PI name...">
-                </div>
-                <div>
-                    <label style="font-weight: bold; color: #00669b; display: block; margin-bottom: 5px;">Sponsor:</label>
-                    <input type="text" id="sponsor-name" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" placeholder="Enter sponsor name...">
-                </div>
-                <div style="grid-column: 1 / -1;">
-                    <label style="font-weight: bold; color: #00669b; display: block; margin-bottom: 5px;">Contract Research Organization (CRO):</label>
-                    <input type="text" id="cro-name" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" placeholder="Enter CRO name (if applicable)...">
+
+                <!-- Future Tool Placeholder -->
+                <div class="tool-card">
+                    <span class="coming-soon">Coming Soon</span>
+                    <span class="icon">📊</span>
+                    <h3>Protocol Tracker</h3>
+                    <p>Track protocol amendments, deviations, and compliance across multiple study sites. Maintain regulatory compliance with automated alerts and reporting.</p>
+                    <button class="btn btn-secondary" disabled>Coming Soon</button>
                 </div>
             </div>
         </div>
+    </section>
 
-        <div class="section-legend">
-            <strong>Section Reference Guide:</strong> In the boxes next to each checkbox, enter the section number(s) from the agreement that correspond to that item (e.g., "3.1" or "2.4, 5.2").
-        </div>
-
-        <div class="completion-status" id="completionStatus">
-            Checklist Progress: <span id="progressText">0%</span>
-            <div class="progress-bar-container">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-        </div>
-
-        <!-- Pre-amble / Notices / Signatories -->
-        <div class="section">
-            <div class="section-title">Pre-amble / Notices / Signatories</div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="parties-correct">
-                <label class="checkbox-label" for="parties-correct">Parties to the agreement / addresses are correct</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="notice-provision">
-                <label class="checkbox-label" for="notice-provision">Notice provision included with correct addresses / email</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="signature-block">
-                <label class="checkbox-label" for="signature-block">Signature block for UBC, VCH and PI</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="protocol-attached">
-                <label class="checkbox-label" for="protocol-attached">Protocol attached</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="budget-attached">
-                <label class="checkbox-label" for="budget-attached">Budget attached; payment schedule received/reviewed</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="notes-section">
-                <label class="notes-label">Notes:</label>
-                <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-            </div>
-        </div>
-
-        <!-- Study Conduct -->
-        <div class="section">
-            <div class="section-title">Study Conduct</div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="agreement-governs">
-                <label class="checkbox-label" for="agreement-governs">Agreement governs vs protocol</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="study-personnel">
-                <label class="checkbox-label" for="study-personnel">Definition of Study Personnel (exclude privileged physicians)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="study-data">
-                <label class="checkbox-label" for="study-data">Definition of Study Data (clarify distinction with Institution Records)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="equipment-liability">
-                <label class="checkbox-label" for="equipment-liability">Equipment Liability (normal wear and tear excepted, list equipment)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="notes-section">
-                <label class="notes-label">Notes:</label>
-                <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-            </div>
-        </div>
-
-        <div class="two-column">
-            <!-- Boilerplate -->
-            <div class="section">
-                <div class="section-title">Boilerplate</div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="amending-agreement">
-                    <label class="checkbox-label" for="amending-agreement">Amending the Agreement</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="assignment">
-                    <label class="checkbox-label" for="assignment">Assignment</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="severability">
-                    <label class="checkbox-label" for="severability">Severability</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="surviving-terms">
-                    <label class="checkbox-label" for="surviving-terms">Surviving Terms</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="waiver">
-                    <label class="checkbox-label" for="waiver">Waiver</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="force-majeure">
-                    <label class="checkbox-label" for="force-majeure">Force Majeure</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="disclaimer">
-                    <label class="checkbox-label" for="disclaimer">Disclaimer</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="notes-section">
-                    <label class="notes-label">Notes:</label>
-                    <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-                </div>
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why Choose Our Tools?</h2>
+                <p>Built by clinical research professionals, for clinical research professionals</p>
             </div>
 
-            <!-- Entire Agreement -->
-            <div class="section">
-                <div class="section-title">Entire Agreement</div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="clause-included">
-                    <label class="checkbox-label" for="clause-included">Clause included</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <h4>Secure & Private</h4>
+                    <p>All data is stored locally in your browser. No sensitive information ever leaves your device.</p>
                 </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="supercedes-agreements">
-                    <label class="checkbox-label" for="supercedes-agreements">Supercedes agreements / reps of prior date</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
+
+                <div class="feature">
+                    <div class="feature-icon">💾</div>
+                    <h4>Save & Export</h4>
+                    <p>Save your work and export to multiple formats including PDF, Excel, and JSON for easy sharing.</p>
                 </div>
-                <div class="notes-section">
-                    <label class="notes-label">Notes:</label>
-                    <textarea class="notes-input" placeholder="Add notes here..."></textarea>
+
+                <div class="feature">
+                    <div class="feature-icon">📱</div>
+                    <h4>Mobile Friendly</h4>
+                    <p>Access your tools from any device. Responsive design ensures functionality on desktop, tablet, and mobile.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h4>Industry Focused</h4>
+                    <p>Designed specifically for clinical trials with input from experienced research coordinators and PIs.</p>
                 </div>
             </div>
         </div>
+    </section>
 
-        <div class="two-column">
-            <!-- Governing Law -->
-            <div class="section">
-                <div class="section-title">Governing Law</div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="governing-law">
-                    <label class="checkbox-label" for="governing-law">BC / Ontario / Silent</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="notes-section">
-                    <label class="notes-label">Notes:</label>
-                    <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-                </div>
-            </div>
-
-            <!-- Debarment -->
-            <div class="section">
-                <div class="section-title">Debarment</div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="regulations-referenced">
-                    <label class="checkbox-label" for="regulations-referenced">Which regulations referenced?</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="certifications-separate">
-                    <label class="checkbox-label" for="certifications-separate">Certifications for institution and investigator separate</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="notes-section">
-                    <label class="notes-label">Notes:</label>
-                    <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-                </div>
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-content">
+                <h2>About Clinical Trial Management Suite</h2>
+                <p>Our suite of tools is designed to simplify the complex administrative tasks associated with clinical trials. From initial budget planning to ongoing agreement management, we provide the digital infrastructure that research teams need to focus on what matters most - advancing medical science and improving patient outcomes.</p>
+                <p>Built with modern web technologies and a deep understanding of clinical research workflows, our tools are continuously updated based on user feedback and industry best practices.</p>
             </div>
         </div>
+    </section>
 
-        <!-- Applicable Law -->
-        <div class="section">
-            <div class="section-title">Applicable Law</div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="canada-law">
-                <label class="checkbox-label" for="canada-law">Canada (e.g. Food & Drug Act)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="bc-privacy">
-                <label class="checkbox-label" for="bc-privacy">BC Privacy (FOIPPA)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="notes-section">
-                <label class="notes-label">Notes:</label>
-                <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-            </div>
+    <!-- Call to Action -->
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Streamline Your Clinical Trials?</h2>
+            <p>Start using our free tools today and experience the difference in your workflow.</p>
+            <a href="#tools" class="btn">Get Started Now</a>
         </div>
+    </section>
 
-        <!-- Confidential Information -->
-        <div class="section">
-            <div class="section-title">Confidential Information</div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="definition-ci">
-                <label class="checkbox-label" for="definition-ci">Definition of CI</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="sub-item">
-                <div class="checkbox-item">
-                    <input type="checkbox" id="ci-reasonable">
-                    <label class="checkbox-label" for="ci-reasonable">Reasonable (e.g. no customer lists)</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="ci-tied">
-                    <label class="checkbox-label" for="ci-tied">Tied to Agreement and/or Study</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="time-limit">
-                <label class="checkbox-label" for="time-limit">Time limit on obligation not to disclose CI</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="exclusions-ci">
-                <label class="checkbox-label" for="exclusions-ci">Exclusions from CI</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="carve-out">
-                <label class="checkbox-label" for="carve-out">Carve out for medical records</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="retain-copy">
-                <label class="checkbox-label" for="retain-copy">Retain 1 copy of CI for ....</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="notes-section">
-                <label class="notes-label">Notes:</label>
-                <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-            </div>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Clinical Trial Management Suite. All rights reserved.</p>
         </div>
+    </footer>
 
-        <!-- Intellectual Property -->
-        <div class="section">
-            <div class="section-title">Intellectual Property</div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="protect-background-ip">
-                <label class="checkbox-label" for="protect-background-ip">Protect background IP</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="scope-ownership">
-                <label class="checkbox-label" for="scope-ownership">Scope of Sponsor's ownership (drug/device, under this Agreement)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="institution-data">
-                <label class="checkbox-label" for="institution-data">Ensure institution data is a carve out (CI, Documentation, IP)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="cooperate-expense">
-                <label class="checkbox-label" for="cooperate-expense">Cooperate at Sponsor's expense to protect Sponsor IP</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="sponsor-grants">
-                <label class="checkbox-label" for="sponsor-grants">Sponsor grants license to Institution for ...</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="notes-section">
-                <label class="notes-label">Notes:</label>
-                <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-            </div>
-        </div>
-
-        <!-- Publication -->
-        <div class="section">
-            <div class="section-title">Publication</div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="pre-review">
-                <label class="checkbox-label" for="pre-review">Pre-review period (e.g. 30/45 days)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="deletion-ci">
-                <label class="checkbox-label" for="deletion-ci">Deletion of CI (except results / methodology)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="delay-ip">
-                <label class="checkbox-label" for="delay-ip">Delay for IP protection (e.g. 90/120 days)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="multi-site">
-                <label class="checkbox-label" for="multi-site">Multi-site publication (12/18/24 months)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="publish-first">
-                <label class="checkbox-label" for="publish-first">Publish upon the first occurrence of the following...</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="notes-section">
-                <label class="notes-label">Notes:</label>
-                <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-            </div>
-        </div>
-
-        <!-- Use of Name -->
-        <div class="section">
-            <div class="section-title">Use of Name</div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="mutual-limitations">
-                <label class="checkbox-label" for="mutual-limitations">Mutual and reasonable limitations on use of name</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="enable-disclosures">
-                <label class="checkbox-label" for="enable-disclosures">Enable appropriate disclosures (inc aggregate annual funding)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="vchri-posting">
-                <label class="checkbox-label" for="vchri-posting">Posting on the VCHRI website</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="notes-section">
-                <label class="notes-label">Notes:</label>
-                <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-            </div>
-        </div>
-
-        <!-- Indemnification -->
-        <div class="section">
-            <div class="section-title">Indemnification</div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="sponsor-indemnity">
-                <label class="checkbox-label" for="sponsor-indemnity">Sponsor's indemnity:</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="sub-item">
-                <div class="checkbox-item">
-                    <input type="checkbox" id="sponsor-will-do">
-                    <label class="checkbox-label" for="sponsor-will-do">Sponsor will do what? (I,D,HH)</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="for-whom">
-                    <label class="checkbox-label" for="for-whom">For whom?</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="against-what">
-                    <label class="checkbox-label" for="against-what">Against what?</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="caused-by">
-                    <label class="checkbox-label" for="caused-by">Caused by what?</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="sub-item">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="administration-of">
-                        <label class="checkbox-label" for="administration-of">Administration of ...</label>
-                        <input type="text" class="section-ref" placeholder="Section #">
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="procedures">
-                        <label class="checkbox-label" for="procedures">Procedures...</label>
-                        <input type="text" class="section-ref" placeholder="Section #">
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="sponsor-negligence">
-                        <label class="checkbox-label" for="sponsor-negligence">Sponsor/CRO negligence</label>
-                        <input type="text" class="section-ref" placeholder="Section #">
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="sponsor-breach">
-                        <label class="checkbox-label" for="sponsor-breach">Sponsor/CRO breach</label>
-                        <input type="text" class="section-ref" placeholder="Section #">
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="sponsor-law">
-                        <label class="checkbox-label" for="sponsor-law">Sponsor/CRO applicable law</label>
-                        <input type="text" class="section-ref" placeholder="Section #">
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="sponsor-use-results">
-                        <label class="checkbox-label" for="sponsor-use-results">Sponsor/CRO use of results</label>
-                        <input type="text" class="section-ref" placeholder="Section #">
-                    </div>
-                </div>
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="exclusions">
-                <label class="checkbox-label" for="exclusions">Exclusions</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="sub-item">
-                <div class="checkbox-item">
-                    <input type="checkbox" id="material-terms">
-                    <label class="checkbox-label" for="material-terms">Material terms of protocol</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="negligence">
-                    <label class="checkbox-label" for="negligence">Negligence</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="procedural-matters">
-                <label class="checkbox-label" for="procedural-matters">Procedural Matters?</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="sub-item">
-                <div class="checkbox-item">
-                    <input type="checkbox" id="giving-notice">
-                    <label class="checkbox-label" for="giving-notice">Giving notice of claim</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="no-settlement">
-                    <label class="checkbox-label" for="no-settlement">No settlement admitting fault</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="reasonable-cooperation">
-                    <label class="checkbox-label" for="reasonable-cooperation">Reasonable cooperation</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="retain-counsel">
-                    <label class="checkbox-label" for="retain-counsel">Retain separate legal counsel</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="additional-requirements">
-                <label class="checkbox-label" for="additional-requirements">Additional Requirements</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="sub-item">
-                <div class="checkbox-item">
-                    <input type="checkbox" id="separately">
-                    <label class="checkbox-label" for="separately">Separately</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="survives">
-                    <label class="checkbox-label" for="survives">Survives</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-            </div>
-            <div class="notes-section">
-                <label class="notes-label">Notes:</label>
-                <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-            </div>
-        </div>
-
-        <!-- Subject Injury -->
-        <div class="section">
-            <div class="section-title">Subject Injury</div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="adverse-reaction">
-                <label class="checkbox-label" for="adverse-reaction">Adverse reaction, injury & illness?</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="drug-device">
-                <label class="checkbox-label" for="drug-device">Drug/device/procedures?</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="diagnosis-treatment">
-                <label class="checkbox-label" for="diagnosis-treatment">Diagnosis & treatment?</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="reasonable-carve-outs">
-                <label class="checkbox-label" for="reasonable-carve-outs">Reasonable carve outs?</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="government-insurance">
-                <label class="checkbox-label" for="government-insurance">Government sponsored insurance, our negligence, underlying conditions (unless exacerbated)</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="extent-caused">
-                <label class="checkbox-label" for="extent-caused">To the extent caused by?</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="consistency-icf">
-                <label class="checkbox-label" for="consistency-icf">Consistency with ICF?</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="notes-section">
-                <label class="notes-label">Notes:</label>
-                <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-            </div>
-        </div>
-
-        <!-- Insurance -->
-        <div class="section">
-            <div class="section-title">Insurance - Sponsor's Insurance</div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="limits-sufficient">
-                <label class="checkbox-label" for="limits-sufficient">Limits sufficient</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="categories-insurance">
-                <label class="checkbox-label" for="categories-insurance">Categories of insurance</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="not-construed">
-                <label class="checkbox-label" for="not-construed">Not construed as limit</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="canada-coverage">
-                <label class="checkbox-label" for="canada-coverage">Canada as coverage territory</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="notification-change">
-                <label class="checkbox-label" for="notification-change">Notification of material change</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="no-time-limit">
-                <label class="checkbox-label" for="no-time-limit">No time limit</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="additional-insured">
-                <label class="checkbox-label" for="additional-insured">Additional insured</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="checkbox-item">
-                <input type="checkbox" id="certificate-requested">
-                <label class="checkbox-label" for="certificate-requested">Certificate requested</label>
-                <input type="text" class="section-ref" placeholder="Section #">
-            </div>
-            <div class="notes-section">
-                <label class="notes-label">Notes:</label>
-                <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-            </div>
-        </div>
-
-        <div class="two-column">
-            <!-- Term -->
-            <div class="section">
-                <div class="section-title">Term</div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="term-defined">
-                    <label class="checkbox-label" for="term-defined">Term of Agreement defined</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="notes-section">
-                    <label class="notes-label">Notes:</label>
-                    <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-                </div>
-            </div>
-
-            <!-- Termination -->
-            <div class="section">
-                <div class="section-title">Termination</div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="material-breach">
-                    <label class="checkbox-label" for="material-breach">Material breach</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="participant-safety">
-                    <label class="checkbox-label" for="participant-safety">Participant safety</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="loss-regulatory">
-                    <label class="checkbox-label" for="loss-regulatory">Loss of regulatory / REB approval</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="for-convenience">
-                    <label class="checkbox-label" for="for-convenience">For convenience (or PI unable to continue)</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="non-cancellable">
-                    <label class="checkbox-label" for="non-cancellable">Non-cancellable costs</label>
-                    <input type="text" class="section-ref" placeholder="Section #">
-                </div>
-                <div class="notes-section">
-                    <label class="notes-label">Notes:</label>
-                    <textarea class="notes-input" placeholder="Add notes here..."></textarea>
-                </div>
-            </div>
-        </div>
-
-        <!-- General Notes Section -->
-        <div class="section general-notes-section">
-            <div class="section-title general-notes-title">General Notes / Additional Comments</div>
-            <div class="general-notes-info">
-                Use this section for any additional notes, follow-up items, or comments that don't fit in the specific sections above.
-            </div>
-            <textarea id="general-notes" class="general-notes-textarea" placeholder="Enter any additional notes, reminders, or comments here..."></textarea>
-        </div>
-
-        <div class="button-container">
-            <button class="button button-primary" id="downloadButton">Download Saved Checklist</button>
-            <button class="button button-primary" id="loadButton">Load Saved Checklist</button>
-            <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="loadFromFile(event)">
-            <button class="button button-success" id="exportTextButton">Export to Text</button>
-            <button class="button button-primary" id="printButton">Print Checklist</button>
-            <button class="button button-danger" id="clearAllButton">Clear All</button>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+    <!-- Smooth Scrolling Script -->
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

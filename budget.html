@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Trial Budget Calculator</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/budget.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <h1>Clinical Trial Budget Calculator</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="cta-checklist.html">CTA Checklist</a></li>
+                    <li><a href="#" class="active">Budget Calculator</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mt-4">
+        <!-- Budget Header -->
+        <div class="budget-header">
+            <h1>Clinical Trial Budget Calculator</h1>
+            <p>Calculate comprehensive costs for your clinical trial including per-patient, fixed, equipment, and personnel expenses.</p>
+            <div class="currency-selector">
+                <label for="currency">Currency:</label>
+                <select id="currency">
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="CAD">CAD ($)</option>
+                    <option value="AUD">AUD ($)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-indicator">
+            <div class="progress-text">Budget Completion: <span id="progressPercentage">0%</span></div>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar" style="width: 0%">0%</div>
+            </div>
+        </div>
+
+        <!-- Study Information -->
+        <div class="budget-section">
+            <h2>Study Information</h2>
+            <div class="study-info-grid">
+                <div class="form-group">
+                    <label for="protocolNumber">Protocol Number *</label>
+                    <input type="text" id="protocolNumber" class="form-control" placeholder="Enter protocol number" required>
+                </div>
+                <div class="form-group">
+                    <label for="studyTitle">Study Title *</label>
+                    <input type="text" id="studyTitle" class="form-control" placeholder="Enter study title" required>
+                </div>
+                <div class="form-group">
+                    <label for="principalInvestigator">Principal Investigator *</label>
+                    <input type="text" id="principalInvestigator" class="form-control" placeholder="Enter PI name" required>
+                </div>
+                <div class="form-group">
+                    <label for="sponsor">Sponsor *</label>
+                    <input type="text" id="sponsor" class="form-control" placeholder="Enter sponsor name" required>
+                </div>
+                <div class="form-group">
+                    <label for="studyDuration">Study Duration (months) *</label>
+                    <input type="number" id="studyDuration" class="form-control" placeholder="e.g., 24" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="expectedEnrollment">Expected Enrollment *</label>
+                    <input type="number" id="expectedEnrollment" class="form-control" placeholder="Number of patients" min="1" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Per-Patient Costs -->
+        <div class="budget-section">
+            <h2>Per-Patient Costs</h2>
+            
+            <h3>Visit Fees</h3>
+            <div class="cost-item">
+                <label for="screeningVisit">Screening Visit</label>
+                <input type="number" id="screeningVisit" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="screeningVisit">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="baselineVisit">Baseline Visit</label>
+                <input type="number" id="baselineVisit" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="baselineVisit">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="followUpVisit">Follow-up Visit</label>
+                <input type="number" id="followUpVisit" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <input type="number" id="followUpQuantity" class="cost-input quantity-input" placeholder="Qty" min="0" value="1">
+                <span class="cost-display" data-cost="followUpTotal">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="endOfStudyVisit">End of Study Visit</label>
+                <input type="number" id="endOfStudyVisit" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="endOfStudyVisit">$0.00</span>
+            </div>
+
+            <h3>Procedures & Compensation</h3>
+            <div class="cost-item">
+                <label for="labTests">Laboratory Tests</label>
+                <input type="number" id="labTests" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="labTests">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="imagingProcedures">Imaging Procedures</label>
+                <input type="number" id="imagingProcedures" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="imagingProcedures">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="patientStipend">Patient Stipend/Compensation</label>
+                <input type="number" id="patientStipend" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="patientStipend">$0.00</span>
+            </div>
+
+            <div class="custom-items" id="perPatientCustomItems">
+                <h4>Additional Per-Patient Items</h4>
+                <div id="perPatientCustomList"></div>
+                <button class="add-item-btn" onclick="addCustomItem('perPatient')">+ Add Custom Item</button>
+            </div>
+
+            <div class="notes-section mt-3">
+                <label for="perPatientNotes">Notes:</label>
+                <textarea id="perPatientNotes" class="notes-textarea" placeholder="Add any notes about per-patient costs..."></textarea>
+            </div>
+        </div>
+
+        <!-- Fixed Study Costs -->
+        <div class="budget-section">
+            <h2>Fixed Study Costs</h2>
+            
+            <div class="cost-item">
+                <label for="siteInitiation">Site Initiation Fee</label>
+                <input type="number" id="siteInitiation" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="siteInitiation">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="siteMonitoring">Site Monitoring Fees</label>
+                <input type="number" id="siteMonitoring" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="siteMonitoring">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="regulatorySubmission">Regulatory Submission Fees</label>
+                <input type="number" id="regulatorySubmission" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="regulatorySubmission">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="irbFees">IRB/REB Fees</label>
+                <input type="number" id="irbFees" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="irbFees">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="siteCloseOut">Site Close-out Fee</label>
+                <input type="number" id="siteCloseOut" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="siteCloseOut">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="dataManagement">Data Management Fees</label>
+                <input type="number" id="dataManagement" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="dataManagement">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="statisticalAnalysis">Statistical Analysis Fees</label>
+                <input type="number" id="statisticalAnalysis" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="statisticalAnalysis">$0.00</span>
+            </div>
+
+            <div class="custom-items" id="fixedCustomItems">
+                <h4>Additional Fixed Items</h4>
+                <div id="fixedCustomList"></div>
+                <button class="add-item-btn" onclick="addCustomItem('fixed')">+ Add Custom Item</button>
+            </div>
+
+            <div class="notes-section mt-3">
+                <label for="fixedNotes">Notes:</label>
+                <textarea id="fixedNotes" class="notes-textarea" placeholder="Add any notes about fixed costs..."></textarea>
+            </div>
+        </div>
+
+        <!-- Equipment/Supply Costs -->
+        <div class="budget-section">
+            <h2>Equipment & Supply Costs</h2>
+            
+            <div class="cost-item">
+                <label for="studyDrugDevice">Study Drug/Device Costs</label>
+                <input type="number" id="studyDrugDevice" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="studyDrugDevice">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="laboratorySupplies">Laboratory Supplies</label>
+                <input type="number" id="laboratorySupplies" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="laboratorySupplies">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="equipmentRental">Medical Equipment Rental</label>
+                <input type="number" id="equipmentRental" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="equipmentRental">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="storageCosts">Storage Costs</label>
+                <input type="number" id="storageCosts" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="storageCosts">$0.00</span>
+            </div>
+
+            <div class="custom-items" id="equipmentCustomItems">
+                <h4>Additional Equipment Items</h4>
+                <div id="equipmentCustomList"></div>
+                <button class="add-item-btn" onclick="addCustomItem('equipment')">+ Add Custom Item</button>
+            </div>
+
+            <div class="notes-section mt-3">
+                <label for="equipmentNotes">Notes:</label>
+                <textarea id="equipmentNotes" class="notes-textarea" placeholder="Add any notes about equipment/supply costs..."></textarea>
+            </div>
+        </div>
+
+        <!-- Personnel Costs -->
+        <div class="budget-section">
+            <h2>Personnel Costs</h2>
+            
+            <div class="cost-item">
+                <label for="piTime">Principal Investigator Time</label>
+                <input type="number" id="piTime" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="piTime">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="coordinatorTime">Research Coordinator Time</label>
+                <input type="number" id="coordinatorTime" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="coordinatorTime">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="dataEntryTime">Data Entry Personnel</label>
+                <input type="number" id="dataEntryTime" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="dataEntryTime">$0.00</span>
+            </div>
+            <div class="cost-item">
+                <label for="otherStaffTime">Other Study Staff</label>
+                <input type="number" id="otherStaffTime" class="cost-input" placeholder="0.00" step="0.01" min="0">
+                <span class="cost-display" data-cost="otherStaffTime">$0.00</span>
+            </div>
+
+            <div class="custom-items" id="personnelCustomItems">
+                <h4>Additional Personnel Items</h4>
+                <div id="personnelCustomList"></div>
+                <button class="add-item-btn" onclick="addCustomItem('personnel')">+ Add Custom Item</button>
+            </div>
+
+            <div class="notes-section mt-3">
+                <label for="personnelNotes">Notes:</label>
+                <textarea id="personnelNotes" class="notes-textarea" placeholder="Add any notes about personnel costs..."></textarea>
+            </div>
+        </div>
+
+        <!-- Tax/Overhead Section -->
+        <div class="budget-section">
+            <h2>Tax & Overhead</h2>
+            <div class="overhead-section">
+                <div class="overhead-controls">
+                    <label for="overheadPercentage">Overhead/Indirect Costs (%)</label>
+                    <input type="number" id="overheadPercentage" class="cost-input overhead-input" placeholder="0" step="0.1" min="0" max="100">
+                    <span class="cost-display" id="overheadAmount">$0.00</span>
+                </div>
+                <p class="text-muted mt-2">Applies to subtotal before tax</p>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-section">
+            <h2>Budget Summary</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">Total Per-Patient Cost</div>
+                    <div class="summary-value" id="totalPerPatient">$0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total Fixed Costs</div>
+                    <div class="summary-value" id="totalFixed">$0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Total Study Cost</div>
+                    <div class="summary-value" id="totalStudyCost">$0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Cost Per Patient (All-in)</div>
+                    <div class="summary-value" id="allInPerPatient">$0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="breakdown-section">
+            <h2>Cost Breakdown by Category</h2>
+            <div class="breakdown-grid">
+                <div class="breakdown-item">
+                    <div class="breakdown-label">Per-Patient Costs</div>
+                    <div class="breakdown-value" id="breakdownPerPatient">$0</div>
+                    <div class="breakdown-percentage" id="percentPerPatient">0%</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-label">Fixed Study Costs</div>
+                    <div class="breakdown-value" id="breakdownFixed">$0</div>
+                    <div class="breakdown-percentage" id="percentFixed">0%</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-label">Equipment & Supplies</div>
+                    <div class="breakdown-value" id="breakdownEquipment">$0</div>
+                    <div class="breakdown-percentage" id="percentEquipment">0%</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="breakdown-label">Personnel</div>
+                    <div class="breakdown-value" id="breakdownPersonnel">$0</div>
+                    <div class="breakdown-percentage" id="percentPersonnel">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoice Schedule -->
+        <div class="invoice-section">
+            <h2>Invoice Schedule</h2>
+            <p>Define payment milestones for budget allocation</p>
+            <div class="milestone-grid" id="milestoneGrid">
+                <div class="milestone-item">
+                    <input type="text" class="form-control" placeholder="Site Initiation" value="Site Initiation">
+                    <input type="number" class="form-control" placeholder="%" value="25" min="0" max="100">
+                    <span class="cost-display milestone-amount">$0.00</span>
+                    <button class="remove-item-btn" onclick="removeMilestone(this)">Remove</button>
+                </div>
+                <div class="milestone-item">
+                    <input type="text" class="form-control" placeholder="50% Enrollment" value="50% Enrollment">
+                    <input type="number" class="form-control" placeholder="%" value="50" min="0" max="100">
+                    <span class="cost-display milestone-amount">$0.00</span>
+                    <button class="remove-item-btn" onclick="removeMilestone(this)">Remove</button>
+                </div>
+                <div class="milestone-item">
+                    <input type="text" class="form-control" placeholder="Study Completion" value="Study Completion">
+                    <input type="number" class="form-control" placeholder="%" value="25" min="0" max="100">
+                    <span class="cost-display milestone-amount">$0.00</span>
+                    <button class="remove-item-btn" onclick="removeMilestone(this)">Remove</button>
+                </div>
+            </div>
+            <button class="add-item-btn mt-3" onclick="addMilestone()">+ Add Milestone</button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="saveBudget()">Save Budget</button>
+            <button class="btn btn-primary" onclick="loadBudget()">Load Budget</button>
+            <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="loadFromFile(event)">
+            <button class="btn btn-success" onclick="exportToPDF()">Export to PDF</button>
+            <button class="btn btn-success" onclick="exportToExcel()">Export to Excel</button>
+            <button class="btn btn-success" onclick="exportToText()">Export to Text</button>
+            <button class="btn btn-warning" onclick="printBudget()">Print Budget</button>
+            <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
+        </div>
+
+        <!-- General Notes -->
+        <div class="budget-section">
+            <h2>General Notes</h2>
+            <textarea id="generalNotes" class="notes-textarea" style="min-height: 150px;" placeholder="Add any general notes about the budget, assumptions, or special considerations..."></textarea>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Clinical Trial Management Suite. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Options</h3>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Choose your export format:</p>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="includeNotes" checked> Include notes in export
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="includeBreakdown" checked> Include category breakdown
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include SheetJS for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- Budget Calculator JavaScript -->
+    <script src="assets/js/budget.js"></script>
+</body>
+</html>
