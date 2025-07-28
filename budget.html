@@ -6,6 +6,7 @@
     <title>Clinical Trial Budget Calculator</title>
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/budget.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Header -->
@@ -21,6 +22,28 @@
             </nav>
         </div>
     </header>
+
+    <!-- TOC Toggle Button -->
+    <button class="toc-toggle" id="tocToggle" onclick="toggleTOC()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Table of Contents -->
+    <nav class="table-of-contents" id="tableOfContents">
+        <h3><i class="fas fa-list"></i> Quick Navigation</h3>
+        <ul>
+            <li><a href="#study-info">Study Information</a></li>
+            <li><a href="#per-patient-costs">Per-Patient Costs</a></li>
+            <li><a href="#fixed-costs">Fixed Study Costs</a></li>
+            <li><a href="#equipment-costs">Equipment & Supply Costs</a></li>
+            <li><a href="#personnel-costs">Personnel Costs</a></li>
+            <li><a href="#tax-overhead">Tax & Overhead</a></li>
+            <li><a href="#summary">Budget Summary</a></li>
+            <li><a href="#breakdown">Cost Breakdown</a></li>
+            <li><a href="#invoice-schedule">Invoice Schedule</a></li>
+            <li><a href="#general-notes">General Notes</a></li>
+        </ul>
+    </nav>
 
     <!-- Main Content -->
     <main class="container mt-4">
@@ -49,9 +72,10 @@
         </div>
 
         <!-- Study Information -->
-        <div class="budget-section">
-            <h2>Study Information</h2>
-            <div class="study-info-grid">
+        <div class="budget-section collapsible-section" id="study-info">
+            <h2 class="section-header" onclick="toggleSection('study-info')"><i class="fas fa-chevron-down section-icon"></i> Study Information</h2>
+            <div class="section-content" id="study-info-content">
+                <div class="study-info-grid">
                 <div class="form-group">
                     <label for="protocolNumber">Protocol Number *</label>
                     <input type="text" id="protocolNumber" class="form-control" placeholder="Enter protocol number" required>
@@ -76,19 +100,20 @@
                     <label for="expectedEnrollment">Expected Enrollment *</label>
                     <input type="number" id="expectedEnrollment" class="form-control" placeholder="Number of patients" min="1" required>
                 </div>
+                </div>
             </div>
         </div>
 
         <!-- Per-Patient Costs -->
-        <div class="budget-section">
-            <h2>Per-Patient Costs</h2>
+        <div class="budget-section collapsible-section" id="per-patient-costs">
+            <h2 class="section-header" onclick="toggleSection('per-patient-costs')"><i class="fas fa-chevron-down section-icon"></i> Per-Patient Costs</h2>
             
             <div id="perPatientDefaultItems"></div>
 
             <div class="custom-items" id="perPatientCustomItems">
                 <h4>Additional Per-Patient Items</h4>
                 <div id="perPatientCustomList"></div>
-                <button class="add-item-btn" onclick="addCustomItem('perPatient')">+ Add Custom Item</button>
+                <button class="add-item-btn" onclick="addCustomItem('perPatient')"><i class="fas fa-plus"></i> Add Custom Item</button>
             </div>
 
             <div class="notes-section mt-3">
@@ -98,15 +123,15 @@
         </div>
 
         <!-- Fixed Study Costs -->
-        <div class="budget-section">
-            <h2>Fixed Study Costs</h2>
+        <div class="budget-section collapsible-section" id="fixed-costs">
+            <h2 class="section-header" onclick="toggleSection('fixed-costs')"><i class="fas fa-chevron-down section-icon"></i> Fixed Study Costs</h2>
             
             <div id="fixedDefaultItems"></div>
 
             <div class="custom-items" id="fixedCustomItems">
                 <h4>Additional Fixed Items</h4>
                 <div id="fixedCustomList"></div>
-                <button class="add-item-btn" onclick="addCustomItem('fixed')">+ Add Custom Item</button>
+                <button class="add-item-btn" onclick="addCustomItem('fixed')"><i class="fas fa-plus"></i> Add Custom Item</button>
             </div>
 
             <div class="notes-section mt-3">
@@ -116,15 +141,15 @@
         </div>
 
         <!-- Equipment/Supply Costs -->
-        <div class="budget-section">
-            <h2>Equipment & Supply Costs</h2>
+        <div class="budget-section collapsible-section" id="equipment-costs">
+            <h2 class="section-header" onclick="toggleSection('equipment-costs')"><i class="fas fa-chevron-down section-icon"></i> Equipment & Supply Costs</h2>
             
             <div id="equipmentDefaultItems"></div>
 
             <div class="custom-items" id="equipmentCustomItems">
                 <h4>Additional Equipment Items</h4>
                 <div id="equipmentCustomList"></div>
-                <button class="add-item-btn" onclick="addCustomItem('equipment')">+ Add Custom Item</button>
+                <button class="add-item-btn" onclick="addCustomItem('equipment')"><i class="fas fa-plus"></i> Add Custom Item</button>
             </div>
 
             <div class="notes-section mt-3">
@@ -134,15 +159,15 @@
         </div>
 
         <!-- Personnel Costs -->
-        <div class="budget-section">
-            <h2>Personnel Costs</h2>
+        <div class="budget-section collapsible-section" id="personnel-costs">
+            <h2 class="section-header" onclick="toggleSection('personnel-costs')"><i class="fas fa-chevron-down section-icon"></i> Personnel Costs</h2>
             
             <div id="personnelDefaultItems"></div>
 
             <div class="custom-items" id="personnelCustomItems">
                 <h4>Additional Personnel Items</h4>
                 <div id="personnelCustomList"></div>
-                <button class="add-item-btn" onclick="addCustomItem('personnel')">+ Add Custom Item</button>
+                <button class="add-item-btn" onclick="addCustomItem('personnel')"><i class="fas fa-plus"></i> Add Custom Item</button>
             </div>
 
             <div class="notes-section mt-3">
@@ -152,8 +177,8 @@
         </div>
 
         <!-- Tax/Overhead Section -->
-        <div class="budget-section">
-            <h2>Tax & Overhead</h2>
+        <div class="budget-section collapsible-section" id="tax-overhead">
+            <h2 class="section-header" onclick="toggleSection('tax-overhead')"><i class="fas fa-chevron-down section-icon"></i> Tax & Overhead</h2>
             <div class="overhead-section">
                 <div class="overhead-controls">
                     <label for="overheadPercentage">Overhead/Indirect Costs (%)</label>
@@ -165,8 +190,8 @@
         </div>
 
         <!-- Summary Section -->
-        <div class="summary-section">
-            <h2>Budget Summary</h2>
+        <div class="summary-section collapsible-section" id="summary">
+            <h2 class="section-header" onclick="toggleSection('summary')"><i class="fas fa-chevron-down section-icon"></i> Budget Summary</h2>
             <div class="summary-grid">
                 <div class="summary-item">
                     <div class="summary-label">Total Per-Patient Cost</div>
@@ -188,8 +213,8 @@
         </div>
 
         <!-- Category Breakdown -->
-        <div class="breakdown-section">
-            <h2>Cost Breakdown by Category</h2>
+        <div class="breakdown-section collapsible-section" id="breakdown">
+            <h2 class="section-header" onclick="toggleSection('breakdown')"><i class="fas fa-chevron-down section-icon"></i> Cost Breakdown by Category</h2>
             <div class="filter-controls">
                 <label for="categoryFilter">Filter by Category:</label>
                 <select id="categoryFilter" onchange="filterBudgetItems()">
@@ -239,8 +264,8 @@
         </div>
 
         <!-- Invoice Schedule -->
-        <div class="invoice-section">
-            <h2>Invoice Schedule</h2>
+        <div class="invoice-section collapsible-section" id="invoice-schedule">
+            <h2 class="section-header" onclick="toggleSection('invoice-schedule')"><i class="fas fa-chevron-down section-icon"></i> Invoice Schedule</h2>
             <p>Define payment milestones for budget allocation</p>
             <div class="milestone-grid" id="milestoneGrid">
                 <div class="milestone-item">
@@ -262,28 +287,50 @@
                     <button class="remove-item-btn" onclick="removeMilestone(this)">Remove</button>
                 </div>
             </div>
-            <button class="add-item-btn mt-3" onclick="addMilestone()">+ Add Milestone</button>
+            <button class="add-item-btn mt-3" onclick="addMilestone()"><i class="fas fa-plus"></i> Add Milestone</button>
         </div>
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-            <button class="btn btn-primary" onclick="saveBudget()">Save Budget</button>
-            <button class="btn btn-primary" onclick="loadBudget()">Load Budget</button>
+            <button class="btn btn-primary" onclick="saveBudget()"><i class="fas fa-save"></i> Save Budget</button>
+            <button class="btn btn-primary" onclick="loadBudget()"><i class="fas fa-upload"></i> Load Budget</button>
             <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="loadFromFile(event)">
-            <button class="btn btn-success" onclick="exportToPDF()">Export to PDF</button>
-            <button class="btn btn-success" onclick="exportToExcel()">Export to Excel</button>
-            <button class="btn btn-success" onclick="exportToCSV()">Export to CSV</button>
-            <button class="btn btn-success" onclick="exportToText()">Export to Text</button>
-            <button class="btn btn-warning" onclick="printBudget()">Print Budget</button>
-            <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
+            <button class="btn btn-success" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> Export to PDF</button>
+            <button class="btn btn-success" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Export to Excel</button>
+            <button class="btn btn-success" onclick="exportToCSV()"><i class="fas fa-file-csv"></i> Export to CSV</button>
+            <button class="btn btn-success" onclick="exportToText()"><i class="fas fa-file-alt"></i> Export to Text</button>
+            <button class="btn btn-warning" onclick="printBudget()"><i class="fas fa-print"></i> Print Budget</button>
+            <button class="btn btn-danger" onclick="showClearConfirmation()"><i class="fas fa-trash"></i> Clear All</button>
         </div>
 
         <!-- General Notes -->
-        <div class="budget-section">
-            <h2>General Notes</h2>
+        <div class="budget-section collapsible-section" id="general-notes">
+            <h2 class="section-header" onclick="toggleSection('general-notes')"><i class="fas fa-chevron-down section-icon"></i> General Notes</h2>
             <textarea id="generalNotes" class="notes-textarea" style="min-height: 150px;" placeholder="Add any general notes about the budget, assumptions, or special considerations..."></textarea>
         </div>
     </main>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+        <i class="fas fa-check-circle"></i>
+        <span id="successText">Budget saved successfully!</span>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div class="confirmation-dialog" id="confirmationDialog">
+        <div class="confirmation-content">
+            <h3><i class="fas fa-exclamation-triangle"></i> Are you sure?</h3>
+            <p>This action will permanently delete all budget data and cannot be undone.</p>
+            <div class="confirmation-buttons">
+                <button class="btn btn-secondary" onclick="hideConfirmation()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn btn-danger" onclick="confirmClearAll()">
+                    <i class="fas fa-trash"></i> Delete All Data
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer>

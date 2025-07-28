@@ -87,6 +87,9 @@ document.addEventListener('DOMContentLoaded', function() {
     renderAllDefaultItems();
     updateAllCalculations();
     initializeBudgetChart();
+    initializeTOC();
+    initializeCollapsibleSections();
+    setupRealTimeCalculations();
 });
 
 // Setup event listeners
@@ -1197,3 +1200,161 @@ function updateBudgetChart(totals) {
 function closeModal() {
     document.getElementById('exportModal').style.display = 'none';
 }
+
+// Table of Contents functionality
+function initializeTOC() {
+    const tocToggle = document.getElementById('tocToggle');
+    const toc = document.getElementById('tableOfContents');
+    
+    // Set up scroll spy for active links
+    window.addEventListener('scroll', updateActiveSection);
+    
+    // Initially hide TOC
+    toc.classList.remove('visible');
+}
+
+function toggleTOC() {
+    const tocToggle = document.getElementById('tocToggle');
+    const toc = document.getElementById('tableOfContents');
+    
+    toc.classList.toggle('visible');
+    tocToggle.classList.toggle('active');
+}
+
+function updateActiveSection() {
+    const sections = document.querySelectorAll('.collapsible-section');
+    const tocLinks = document.querySelectorAll('.table-of-contents a');
+    
+    let currentSection = '';
+    sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 150 && rect.bottom >= 150) {
+            currentSection = section.id;
+        }
+    });
+    
+    tocLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSection}`) {
+            link.classList.add('active');
+        }
+    });
+}
+
+// Collapsible sections functionality
+function initializeCollapsibleSections() {
+    // Wrap existing content in section-content divs for sections that don't have them
+    const sections = ['per-patient-costs', 'fixed-costs', 'equipment-costs', 'personnel-costs', 
+                     'tax-overhead', 'summary', 'breakdown', 'invoice-schedule', 'general-notes'];
+    
+    sections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            const header = section.querySelector('.section-header');
+            if (header && !header.nextElementSibling?.classList.contains('section-content')) {
+                const content = document.createElement('div');
+                content.className = 'section-content';
+                content.id = `${sectionId}-content`;
+                
+                // Move all content after header into the content div
+                let nextSibling = header.nextElementSibling;
+                while (nextSibling) {
+                    const next = nextSibling.nextElementSibling;
+                    content.appendChild(nextSibling);
+                    nextSibling = next;
+                }
+                
+                section.appendChild(content);
+            }
+        }
+    });
+}
+
+function toggleSection(sectionId) {
+    const header = document.querySelector(`#${sectionId} .section-header`);
+    const content = document.querySelector(`#${sectionId}-content`);
+    
+    if (header && content) {
+        header.classList.toggle('collapsed');
+        content.classList.toggle('collapsed');
+    }
+}
+
+// Success message functionality
+function showSuccess(message = 'Operation completed successfully!') {
+    const successMsg = document.getElementById('successMessage');
+    const successText = document.getElementById('successText');
+    
+    successText.textContent = message;
+    successMsg.classList.add('show');
+    
+    setTimeout(() => {
+        successMsg.classList.remove('show');
+    }, 3000);
+}
+
+// Enhanced save function with visual feedback
+function saveBudgetWithFeedback() {
+    try {
+        saveBudget();
+        showSuccess('Budget saved successfully!');
+    } catch (error) {
+        showSuccess('Error saving budget. Please try again.');
+        console.error('Save error:', error);
+    }
+}
+
+// Enhanced clear function with confirmation
+function showClearConfirmation() {
+    const dialog = document.getElementById('confirmationDialog');
+    dialog.style.display = 'flex';
+}
+
+function hideConfirmation() {
+    const dialog = document.getElementById('confirmationDialog');
+    dialog.style.display = 'none';
+}
+
+function confirmClearAll() {
+    hideConfirmation();
+    clearAll();
+    showSuccess('All data cleared successfully.');
+}
+
+// Real-time calculations setup
+function setupRealTimeCalculations() {
+    // Add event listeners to all input fields for real-time updates
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('cost-input') || 
+            e.target.classList.contains('form-control') ||
+            e.target.id === 'overheadPercentage') {
+            
+            // Debounce the calculation updates
+            clearTimeout(window.calcTimeout);
+            window.calcTimeout = setTimeout(() => {
+                updateAllCalculations();
+                saveToLocalStorage(); // Auto-save on changes
+            }, 300);
+        }
+    });
+    
+    // Also listen for changes on select elements
+    document.addEventListener('change', function(e) {
+        if (e.target.type === 'select-one' || e.target.type === 'number') {
+            updateAllCalculations();
+            saveToLocalStorage();
+        }
+    });
+}
+
+// Enhanced localStorage with auto-save
+let autoSaveTimeout;
+function autoSave() {
+    clearTimeout(autoSaveTimeout);
+    autoSaveTimeout = setTimeout(() => {
+        saveToLocalStorage();
+    }, 1000); // Save after 1 second of inactivity
+}
+
+// Update all save references to use the new feedback version
+window.saveBudget = saveBudgetWithFeedback;
