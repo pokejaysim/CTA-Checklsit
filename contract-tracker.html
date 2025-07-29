@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contract Tracker</title>
+    <title>Contract Tracker - Clinical Trial Management Suite</title>
+    <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/contract-tracker.css">
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Contract Tracker</h1>
-            <button id="addContractBtn" class="btn btn-primary">+ Add Contract</button>
+        <header class="page-header">
+            <div class="header-content">
+                <h1>Contract Tracker</h1>
+                <p class="subtitle">Manage your clinical trial contracts efficiently</p>
+            </div>
+            <div class="header-actions">
+                <button id="settingsBtn" class="btn btn-secondary">⚙️ Settings</button>
+                <button id="addContractBtn" class="btn btn-primary">+ Add Contract</button>
+            </div>
         </header>
 
         <div class="filters">
@@ -51,6 +58,10 @@
                     <input type="text" id="sponsorName" required>
                 </div>
                 <div class="form-group">
+                    <label for="principalInvestigator">Principal Investigator *</label>
+                    <input type="text" id="principalInvestigator" required>
+                </div>
+                <div class="form-group">
                     <label for="contractType">Type *</label>
                     <select id="contractType" required>
                         <option value="">Select Type</option>
@@ -84,6 +95,40 @@
                     <button type="submit" class="btn btn-primary">Save Contract</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <span class="close" id="settingsClose">&times;</span>
+            </div>
+            <div class="settings-content">
+                <div class="settings-section">
+                    <h3>Contract Types</h3>
+                    <p class="settings-description">Customize the types of contracts you track</p>
+                    <div id="typesList" class="custom-list"></div>
+                    <div class="add-item">
+                        <input type="text" id="newType" placeholder="New contract type">
+                        <button id="addTypeBtn" class="btn btn-sm btn-primary">Add</button>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>Contract Statuses</h3>
+                    <p class="settings-description">Define your workflow stages</p>
+                    <div id="statusesList" class="custom-list"></div>
+                    <div class="add-item">
+                        <input type="text" id="newStatus" placeholder="New status">
+                        <button id="addStatusBtn" class="btn btn-sm btn-primary">Add</button>
+                    </div>
+                </div>
+                <div class="settings-actions">
+                    <button id="resetDefaultsBtn" class="btn btn-secondary">Reset to Defaults</button>
+                    <button id="saveSettingsBtn" class="btn btn-primary">Save Settings</button>
+                </div>
+            </div>
         </div>
     </div>
 

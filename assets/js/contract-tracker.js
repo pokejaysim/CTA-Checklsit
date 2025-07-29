@@ -2,6 +2,14 @@
 let contracts = [];
 let editingContractId = null;
 
+// Default settings
+const DEFAULT_TYPES = ['CTA', 'DTA', 'Budget', 'Other'];
+const DEFAULT_STATUSES = ['Drafting', 'Internal Review', 'Sent to Sponsor', 'Final QC', 'Signed'];
+
+// Custom settings
+let customTypes = [];
+let customStatuses = [];
+
 // DOM Elements
 const contractsList = document.getElementById('contractsList');
 const modal = document.getElementById('contractModal');
@@ -13,10 +21,25 @@ const closeBtn = document.querySelector('.close');
 const typeFilter = document.getElementById('typeFilter');
 const statusFilter = document.getElementById('statusFilter');
 
+// Settings DOM Elements
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsModal = document.getElementById('settingsModal');
+const settingsCloseBtn = document.getElementById('settingsClose');
+const typesList = document.getElementById('typesList');
+const statusesList = document.getElementById('statusesList');
+const newTypeInput = document.getElementById('newType');
+const newStatusInput = document.getElementById('newStatus');
+const addTypeBtn = document.getElementById('addTypeBtn');
+const addStatusBtn = document.getElementById('addStatusBtn');
+const resetDefaultsBtn = document.getElementById('resetDefaultsBtn');
+const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    loadSettings();
     loadContracts();
     renderContracts();
+    updateFilters();
 });
 
 // Event Listeners
@@ -27,10 +50,27 @@ contractForm.addEventListener('submit', handleSubmit);
 typeFilter.addEventListener('change', renderContracts);
 statusFilter.addEventListener('change', renderContracts);
 
+// Settings Event Listeners
+settingsBtn.addEventListener('click', openSettings);
+settingsCloseBtn.addEventListener('click', closeSettings);
+addTypeBtn.addEventListener('click', addType);
+addStatusBtn.addEventListener('click', addStatus);
+resetDefaultsBtn.addEventListener('click', resetToDefaults);
+saveSettingsBtn.addEventListener('click', saveSettings);
+newTypeInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addType();
+});
+newStatusInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addStatus();
+});
+
 // Close modal when clicking outside
 window.addEventListener('click', (e) => {
     if (e.target === modal) {
         closeModal();
+    }
+    if (e.target === settingsModal) {
+        closeSettings();
     }
 });
 
@@ -47,9 +87,34 @@ function saveContracts() {
     localStorage.setItem('contracts', JSON.stringify(contracts));
 }
 
+// Load settings from localStorage
+function loadSettings() {
+    const storedTypes = localStorage.getItem('contractTypes');
+    const storedStatuses = localStorage.getItem('contractStatuses');
+    
+    if (storedTypes) {
+        customTypes = JSON.parse(storedTypes);
+    } else {
+        customTypes = [...DEFAULT_TYPES];
+    }
+    
+    if (storedStatuses) {
+        customStatuses = JSON.parse(storedStatuses);
+    } else {
+        customStatuses = [...DEFAULT_STATUSES];
+    }
+}
+
+// Save settings to localStorage
+function saveSettingsToStorage() {
+    localStorage.setItem('contractTypes', JSON.stringify(customTypes));
+    localStorage.setItem('contractStatuses', JSON.stringify(customStatuses));
+}
+
 // Open modal for adding/editing
 function openModal(contractId = null) {
     editingContractId = contractId;
+    updateModalSelects();
     
     if (contractId) {
         const contract = contracts.find(c => c.id === contractId);
@@ -57,6 +122,7 @@ function openModal(contractId = null) {
             modalTitle.textContent = 'Edit Contract';
             document.getElementById('contractTitle').value = contract.title;
             document.getElementById('sponsorName').value = contract.sponsor;
+            document.getElementById('principalInvestigator').value = contract.principalInvestigator || '';
             document.getElementById('contractType').value = contract.type;
             document.getElementById('contractStatus').value = contract.status;
             document.getElementById('dueDate').value = contract.dueDate || '';
@@ -84,6 +150,7 @@ function handleSubmit(e) {
     const contractData = {
         title: document.getElementById('contractTitle').value,
         sponsor: document.getElementById('sponsorName').value,
+        principalInvestigator: document.getElementById('principalInvestigator').value,
         type: document.getElementById('contractType').value,
         status: document.getElementById('contractStatus').value,
         dueDate: document.getElementById('dueDate').value,
@@ -187,6 +254,7 @@ function createContractCard(contract) {
             <div>
                 <div class="contract-title">${escapeHtml(contract.title)}</div>
                 <div class="contract-sponsor">${escapeHtml(contract.sponsor)}</div>
+                ${contract.principalInvestigator ? `<div class="contract-pi">PI: ${escapeHtml(contract.principalInvestigator)}</div>` : ''}
             </div>
             <div class="contract-actions">
                 <button class="edit-btn" onclick="openModal('${contract.id}')">Edit</button>
@@ -195,10 +263,10 @@ function createContractCard(contract) {
         </div>
         <div class="contract-meta">
             <div class="meta-item">
-                <span class="badge type-${contract.type}">${contract.type}</span>
+                <span class="badge" data-type="${contract.type}">${contract.type}</span>
             </div>
             <div class="meta-item">
-                <span class="badge status-${contract.status.replace(/\s+/g, '-')}">${contract.status}</span>
+                <span class="badge" data-status="${contract.status}">${contract.status}</span>
             </div>
             <div class="meta-item">
                 <span class="${dueDateClass}">📅 ${dueDateText}</span>
@@ -232,3 +300,135 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+// Settings Functions
+function openSettings() {
+    renderSettings();
+    settingsModal.style.display = 'block';
+}
+
+function closeSettings() {
+    settingsModal.style.display = 'none';
+}
+
+function renderSettings() {
+    // Render types
+    typesList.innerHTML = '';
+    customTypes.forEach((type, index) => {
+        const item = document.createElement('div');
+        item.className = 'custom-item';
+        item.innerHTML = `
+            <span>${type}</span>
+            <button onclick="removeType(${index})">&times;</button>
+        `;
+        typesList.appendChild(item);
+    });
+    
+    // Render statuses
+    statusesList.innerHTML = '';
+    customStatuses.forEach((status, index) => {
+        const item = document.createElement('div');
+        item.className = 'custom-item';
+        item.innerHTML = `
+            <span>${status}</span>
+            <button onclick="removeStatus(${index})">&times;</button>
+        `;
+        statusesList.appendChild(item);
+    });
+}
+
+function addType() {
+    const newType = newTypeInput.value.trim();
+    if (newType && !customTypes.includes(newType)) {
+        customTypes.push(newType);
+        newTypeInput.value = '';
+        renderSettings();
+    }
+}
+
+function addStatus() {
+    const newStatus = newStatusInput.value.trim();
+    if (newStatus && !customStatuses.includes(newStatus)) {
+        customStatuses.push(newStatus);
+        newStatusInput.value = '';
+        renderSettings();
+    }
+}
+
+function removeType(index) {
+    customTypes.splice(index, 1);
+    renderSettings();
+}
+
+function removeStatus(index) {
+    customStatuses.splice(index, 1);
+    renderSettings();
+}
+
+function resetToDefaults() {
+    if (confirm('Reset to default types and statuses? This will not affect existing contracts.')) {
+        customTypes = [...DEFAULT_TYPES];
+        customStatuses = [...DEFAULT_STATUSES];
+        renderSettings();
+    }
+}
+
+function saveSettings() {
+    saveSettingsToStorage();
+    updateFilters();
+    updateModalSelects();
+    renderContracts();
+    closeSettings();
+}
+
+// Update filters with custom options
+function updateFilters() {
+    // Update type filter
+    typeFilter.innerHTML = '<option value="">All Types</option>';
+    customTypes.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = type;
+        typeFilter.appendChild(option);
+    });
+    
+    // Update status filter
+    statusFilter.innerHTML = '<option value="">All Statuses</option>';
+    customStatuses.forEach(status => {
+        const option = document.createElement('option');
+        option.value = status;
+        option.textContent = status;
+        statusFilter.appendChild(option);
+    });
+}
+
+// Update modal selects with custom options
+function updateModalSelects() {
+    const typeSelect = document.getElementById('contractType');
+    const statusSelect = document.getElementById('contractStatus');
+    
+    // Update type select
+    typeSelect.innerHTML = '<option value="">Select Type</option>';
+    customTypes.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = type;
+        typeSelect.appendChild(option);
+    });
+    
+    // Update status select
+    statusSelect.innerHTML = '<option value="">Select Status</option>';
+    customStatuses.forEach(status => {
+        const option = document.createElement('option');
+        option.value = status;
+        option.textContent = status;
+        statusSelect.appendChild(option);
+    });
+}
+
+// Make functions available globally for onclick handlers
+window.openModal = openModal;
+window.deleteContract = deleteContract;
+window.toggleNotes = toggleNotes;
+window.removeType = removeType;
+window.removeStatus = removeStatus;
