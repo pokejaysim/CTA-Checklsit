@@ -10,68 +10,74 @@ const DEFAULT_STATUSES = ['Drafting', 'Internal Review', 'Sent to Sponsor', 'Fin
 let customTypes = [];
 let customStatuses = [];
 
-// DOM Elements
-const contractsList = document.getElementById('contractsList');
-const modal = document.getElementById('contractModal');
-const modalTitle = document.getElementById('modalTitle');
-const contractForm = document.getElementById('contractForm');
-const addContractBtn = document.getElementById('addContractBtn');
-const cancelBtn = document.getElementById('cancelBtn');
-const closeBtn = document.querySelector('.close');
-const typeFilter = document.getElementById('typeFilter');
-const statusFilter = document.getElementById('statusFilter');
-
-// Settings DOM Elements
-const settingsBtn = document.getElementById('settingsBtn');
-const settingsModal = document.getElementById('settingsModal');
-const settingsCloseBtn = document.getElementById('settingsClose');
-const typesList = document.getElementById('typesList');
-const statusesList = document.getElementById('statusesList');
-const newTypeInput = document.getElementById('newType');
-const newStatusInput = document.getElementById('newStatus');
-const addTypeBtn = document.getElementById('addTypeBtn');
-const addStatusBtn = document.getElementById('addStatusBtn');
-const resetDefaultsBtn = document.getElementById('resetDefaultsBtn');
-const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+// DOM Elements - will be initialized after DOM loads
+let contractsList, modal, modalTitle, contractForm, addContractBtn, cancelBtn, closeBtn, typeFilter, statusFilter;
+let settingsBtn, settingsModal, settingsCloseBtn, typesList, statusesList, newTypeInput, newStatusInput;
+let addTypeBtn, addStatusBtn, resetDefaultsBtn, saveSettingsBtn;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize DOM elements
+    contractsList = document.getElementById('contractsList');
+    modal = document.getElementById('contractModal');
+    modalTitle = document.getElementById('modalTitle');
+    contractForm = document.getElementById('contractForm');
+    addContractBtn = document.getElementById('addContractBtn');
+    cancelBtn = document.getElementById('cancelBtn');
+    closeBtn = document.querySelector('.close');
+    typeFilter = document.getElementById('typeFilter');
+    statusFilter = document.getElementById('statusFilter');
+    
+    // Settings DOM Elements
+    settingsBtn = document.getElementById('settingsBtn');
+    settingsModal = document.getElementById('settingsModal');
+    settingsCloseBtn = document.getElementById('settingsClose');
+    typesList = document.getElementById('typesList');
+    statusesList = document.getElementById('statusesList');
+    newTypeInput = document.getElementById('newType');
+    newStatusInput = document.getElementById('newStatus');
+    addTypeBtn = document.getElementById('addTypeBtn');
+    addStatusBtn = document.getElementById('addStatusBtn');
+    resetDefaultsBtn = document.getElementById('resetDefaultsBtn');
+    saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    
+    // Set up event listeners
+    addContractBtn.addEventListener('click', () => openModal());
+    cancelBtn.addEventListener('click', () => closeModal());
+    closeBtn.addEventListener('click', () => closeModal());
+    contractForm.addEventListener('submit', handleSubmit);
+    typeFilter.addEventListener('change', renderContracts);
+    statusFilter.addEventListener('change', renderContracts);
+    
+    // Settings Event Listeners
+    settingsBtn.addEventListener('click', openSettings);
+    settingsCloseBtn.addEventListener('click', closeSettings);
+    addTypeBtn.addEventListener('click', addType);
+    addStatusBtn.addEventListener('click', addStatus);
+    resetDefaultsBtn.addEventListener('click', resetToDefaults);
+    saveSettingsBtn.addEventListener('click', saveSettings);
+    newTypeInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addType();
+    });
+    newStatusInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addStatus();
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+        if (e.target === settingsModal) {
+            closeSettings();
+        }
+    });
+    
+    // Load data and render
     loadSettings();
     loadContracts();
     renderContracts();
     updateFilters();
-});
-
-// Event Listeners
-addContractBtn.addEventListener('click', () => openModal());
-cancelBtn.addEventListener('click', () => closeModal());
-closeBtn.addEventListener('click', () => closeModal());
-contractForm.addEventListener('submit', handleSubmit);
-typeFilter.addEventListener('change', renderContracts);
-statusFilter.addEventListener('change', renderContracts);
-
-// Settings Event Listeners
-settingsBtn.addEventListener('click', openSettings);
-settingsCloseBtn.addEventListener('click', closeSettings);
-addTypeBtn.addEventListener('click', addType);
-addStatusBtn.addEventListener('click', addStatus);
-resetDefaultsBtn.addEventListener('click', resetToDefaults);
-saveSettingsBtn.addEventListener('click', saveSettings);
-newTypeInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addType();
-});
-newStatusInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addStatus();
-});
-
-// Close modal when clicking outside
-window.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        closeModal();
-    }
-    if (e.target === settingsModal) {
-        closeSettings();
-    }
 });
 
 // Load contracts from localStorage
@@ -303,6 +309,10 @@ function escapeHtml(text) {
 
 // Settings Functions
 function openSettings() {
+    if (!settingsModal) {
+        console.error('Settings modal not found');
+        return;
+    }
     renderSettings();
     settingsModal.style.display = 'block';
 }
