@@ -1,5 +1,39 @@
 /* Contract Tracker Styles - Extends main.css */
 
+/* Navigation Bar */
+.navbar {
+    background-color: var(--primary-blue);
+    padding: 15px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-home {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+    transition: opacity 0.3s ease;
+}
+
+.nav-home:hover {
+    opacity: 0.8;
+}
+
+.nav-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -13,12 +47,12 @@
     margin-bottom: 40px;
     padding: 30px 0;
     border-bottom: 3px solid var(--primary-blue);
-    background: linear-gradient(to bottom, #ffffff, #f8fbfc);
 }
 
 .header-content h1 {
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
+    color: var(--primary-blue);
 }
 
 .subtitle {
@@ -463,6 +497,10 @@
 @media (max-width: 768px) {
     .container {
         padding: 10px;
+    }
+    
+    .nav-title {
+        display: none;
     }
 
     .page-header {
