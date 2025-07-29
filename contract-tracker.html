@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Tracker</title>
+    <link rel="stylesheet" href="assets/css/contract-tracker.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Contract Tracker</h1>
+            <button id="addContractBtn" class="btn btn-primary">+ Add Contract</button>
+        </header>
+
+        <div class="filters">
+            <select id="typeFilter" class="filter-select">
+                <option value="">All Types</option>
+                <option value="CTA">CTA</option>
+                <option value="DTA">DTA</option>
+                <option value="Budget">Budget</option>
+                <option value="Other">Other</option>
+            </select>
+            <select id="statusFilter" class="filter-select">
+                <option value="">All Statuses</option>
+                <option value="Drafting">Drafting</option>
+                <option value="Internal Review">Internal Review</option>
+                <option value="Sent to Sponsor">Sent to Sponsor</option>
+                <option value="Final QC">Final QC</option>
+                <option value="Signed">Signed</option>
+            </select>
+        </div>
+
+        <div id="contractsList" class="contracts-list"></div>
+    </div>
+
+    <!-- Modal for adding/editing contracts -->
+    <div id="contractModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Contract</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="contractForm">
+                <div class="form-group">
+                    <label for="contractTitle">Contract Title *</label>
+                    <input type="text" id="contractTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="sponsorName">Sponsor / Company Name *</label>
+                    <input type="text" id="sponsorName" required>
+                </div>
+                <div class="form-group">
+                    <label for="contractType">Type *</label>
+                    <select id="contractType" required>
+                        <option value="">Select Type</option>
+                        <option value="CTA">CTA</option>
+                        <option value="DTA">DTA</option>
+                        <option value="Budget">Budget</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="contractStatus">Status *</label>
+                    <select id="contractStatus" required>
+                        <option value="">Select Status</option>
+                        <option value="Drafting">Drafting</option>
+                        <option value="Internal Review">Internal Review</option>
+                        <option value="Sent to Sponsor">Sent to Sponsor</option>
+                        <option value="Final QC">Final QC</option>
+                        <option value="Signed">Signed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="dueDate">Due Date</label>
+                    <input type="date" id="dueDate">
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes (Markdown supported)</label>
+                    <textarea id="notes" rows="4" placeholder="Add any notes..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Contract</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="assets/js/contract-tracker.js"></script>
+</body>
+</html>
