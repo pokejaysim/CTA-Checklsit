@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom editor styles */
+.ProseMirror {
+  outline: none !important;
+  min-height: 400px;
+  padding: 1rem;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #6b7280;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Make the editor container fully clickable */
+.editor-container {
+  min-height: calc(100vh - 300px);
+}
+
+.editor-container .ProseMirror {
+  min-height: inherit;
+}

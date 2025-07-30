@@ -100,7 +100,7 @@ export const NoteEditor: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white dark:bg-gray-800">
+    <div className="flex-1 flex flex-col bg-white dark:bg-gray-800 relative">
       <div className="border-b border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-center justify-between mb-4">
           <input
@@ -209,11 +209,22 @@ export const NoteEditor: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6">
+      <div 
+        className="flex-1 overflow-y-auto cursor-text editor-container"
+        onClick={() => editor?.commands.focus()}
+      >
         <EditorContent 
           editor={editor} 
-          className="prose prose-gray dark:prose-invert max-w-none focus:outline-none"
+          className="prose prose-gray dark:prose-invert max-w-none focus:outline-none h-full"
         />
+        {(!selectedNote?.content || selectedNote.content === '') && (
+          <div 
+            className="absolute inset-6 flex items-start justify-start pointer-events-none text-gray-400 dark:text-gray-500"
+            style={{ top: '200px' }}
+          >
+            <p className="text-lg">Click anywhere to start writing...</p>
+          </div>
+        )}
       </div>
 
       <div className="border-t border-gray-200 dark:border-gray-700 p-4 text-sm text-gray-500 dark:text-gray-400">
