@@ -11,16 +11,18 @@ import {
   Quote,
   Trash2,
   Download,
-  Tag
+  Tag,
+  FolderOpen
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { format } from 'date-fns';
 import { TagInput } from './TagInput';
 
 export const NoteEditor: React.FC = () => {
-  const { selectedNote, updateNote, deleteNote, setSelectedNote } = useApp();
+  const { selectedNote, updateNote, deleteNote, setSelectedNote, folders } = useApp();
   const [title, setTitle] = useState('');
   const [showTagInput, setShowTagInput] = useState(false);
+  const [showFolderSelector, setShowFolderSelector] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const editor = useEditor({
@@ -48,6 +50,18 @@ export const NoteEditor: React.FC = () => {
       editor?.commands.setContent('');
     }
   }, [selectedNote, editor]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowFolderSelector(false);
+    };
+
+    if (showFolderSelector) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showFolderSelector]);
 
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
@@ -84,6 +98,17 @@ export const NoteEditor: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleMoveToFolder = async (folderId: string) => {
+    if (!selectedNote) return;
+    await updateNote(selectedNote.id, { folderId });
+    setShowFolderSelector(false);
+  };
+
+  const getCurrentFolder = () => {
+    if (!selectedNote) return null;
+    return folders.find(f => f.id === selectedNote.folderId);
+  };
+
   if (!selectedNote) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -111,6 +136,54 @@ export const NoteEditor: React.FC = () => {
             placeholder="Untitled Note"
           />
           <div className="flex items-center space-x-2">
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowFolderSelector(!showFolderSelector);
+                }}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                title="Move to folder"
+              >
+                <FolderOpen className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </button>
+              
+              {showFolderSelector && (
+                <div 
+                  className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="p-2">
+                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Move to folder:
+                    </div>
+                    {folders
+                      .filter(f => !f.isDefault || f.name === 'All Notes')
+                      .map((folder) => (
+                        <button
+                          key={folder.id}
+                          onClick={() => handleMoveToFolder(folder.id)}
+                          className={`flex items-center w-full px-3 py-2 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                            getCurrentFolder()?.id === folder.id
+                              ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
+                              : 'text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <div 
+                            className="w-3 h-3 rounded-full mr-2" 
+                            style={{ backgroundColor: folder.color }}
+                          />
+                          {folder.name}
+                          {getCurrentFolder()?.id === folder.id && (
+                            <span className="ml-auto text-xs">Current</span>
+                          )}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            
             <button
               onClick={() => setShowTagInput(!showTagInput)}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"

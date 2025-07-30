@@ -13,7 +13,8 @@ export const NotesList: React.FC = () => {
     createNote, 
     updateNote,
     searchQuery,
-    searchResults 
+    searchResults,
+    folders 
   } = useApp();
   
   const [displayNotes, setDisplayNotes] = useState<Note[]>([]);
@@ -72,6 +73,10 @@ export const NotesList: React.FC = () => {
     return plainText.length > maxLength 
       ? plainText.substring(0, maxLength) + '...' 
       : plainText;
+  };
+
+  const getNoteFolder = (note: Note) => {
+    return folders.find(f => f.id === note.folderId);
   };
 
   return (
@@ -144,6 +149,19 @@ export const NotesList: React.FC = () => {
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
+                    {/* Show folder indicator when searching or viewing All Notes */}
+                    {(searchQuery || selectedFolder?.name === 'All Notes') && (
+                      <div className="flex items-center space-x-1">
+                        <div 
+                          className="w-2 h-2 rounded-full" 
+                          style={{ backgroundColor: getNoteFolder(note)?.color || '#6B7280' }}
+                        />
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {getNoteFolder(note)?.name || 'Unknown'}
+                        </span>
+                      </div>
+                    )}
+                    
                     {note.tags.slice(0, 2).map((tag, index) => (
                       <span
                         key={index}
