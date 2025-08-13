@@ -40,6 +40,60 @@
     overflow: hidden;
 }
 
+/* Beta Card Styling */
+.tool-card.beta-card {
+    background: linear-gradient(135deg, #fff 0%, #f8f9ff 100%);
+    border: 2px solid var(--warning-yellow);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+}
+
+.tool-card.beta-card::before {
+    background: linear-gradient(90deg, var(--warning-yellow) 0%, #ffa000 100%);
+}
+
+.tool-card.beta-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.beta-badge {
+    background: var(--warning-yellow);
+    color: var(--dark-gray);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+.beta-note {
+    color: var(--medium-gray);
+    font-style: italic;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
 .tool-card::before {
     content: '';
     position: absolute;
