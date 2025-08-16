@@ -3,10 +3,12 @@ import { StudyBudget, CostTier, Procedure, Visit, ProcedureVisitMapping } from '
 import { useLocalStorage, useAutoSave } from './hooks/useLocalStorage';
 import { PROCEDURE_LIBRARY, PROCEDURE_CATEGORIES, searchProcedures } from './utils/procedureLibrary';
 import { calculateBudget, formatCurrency, COST_MULTIPLIERS } from './utils/calculations';
+import { exportToExcel, exportToPDF, exportToCSV } from './utils/exportUtils';
 
 // Study Procedures Panel Component
 const StudyProceduresPanel = ({ budget, onUpdateBudget }: any) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [customCost, setCustomCost] = useState('100');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['screening', 'laboratory', 'imaging', 'safety']));
 
   const filteredProcedures = searchProcedures(searchTerm);
@@ -28,6 +30,28 @@ const StudyProceduresPanel = ({ budget, onUpdateBudget }: any) => {
     onUpdateBudget({
       procedures: [...budget.procedures, newProcedure]
     });
+  };
+
+  const addCustomProcedure = () => {
+    if (!searchTerm.trim()) return;
+    
+    const newProcedure: Procedure = {
+      id: crypto.randomUUID(),
+      name: searchTerm.trim(),
+      category: 'Custom',
+      baseCost: Number(customCost) || 100,
+      order: budget.procedures.length
+    };
+    onUpdateBudget({
+      procedures: [...budget.procedures, newProcedure]
+    });
+    setSearchTerm('');
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && searchTerm.trim()) {
+      addCustomProcedure();
+    }
   };
 
   const removeProcedure = (procedureId: string) => {
@@ -53,33 +77,50 @@ const StudyProceduresPanel = ({ budget, onUpdateBudget }: any) => {
         <h2 style={{ fontSize: '1.125rem', fontWeight: '600', margin: '0 0 0.5rem 0' }}>Study Procedures</h2>
         <input
           type="text"
-          placeholder="Add new procedure..."
+          placeholder="Search procedures or type custom procedure name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyPress={handleKeyPress}
           style={{
             width: '100%',
             padding: '0.5rem',
             border: '1px solid #d1d5db',
             borderRadius: '0.375rem',
-            fontSize: '0.875rem'
+            fontSize: '0.875rem',
+            marginBottom: '0.5rem'
           }}
         />
-        {searchTerm && (
-          <button
-            onClick={() => setSearchTerm('')}
-            style={{
-              marginTop: '0.5rem',
-              padding: '0.5rem 1rem',
-              background: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '0.375rem',
-              fontSize: '0.875rem',
-              cursor: 'pointer'
-            }}
-          >
-            Add
-          </button>
+        {searchTerm && filteredProcedures.length === 0 && (
+          <div>
+            <input
+              type="number"
+              placeholder="Cost"
+              value={customCost}
+              onChange={(e) => setCustomCost(e.target.value)}
+              style={{
+                width: '80px',
+                padding: '0.5rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                marginRight: '0.5rem'
+              }}
+            />
+            <button
+              onClick={addCustomProcedure}
+              style={{
+                padding: '0.5rem 1rem',
+                background: '#10b981',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                cursor: 'pointer'
+              }}
+            >
+              Add Custom Procedure
+            </button>
+          </div>
         )}
       </div>
       
@@ -249,6 +290,9 @@ const CostManagementPanel = ({ budget, costTier, currency, onUpdateBudget }: any
 
 // Visit Schedule Panel Component
 const VisitSchedulePanel = ({ budget, onUpdateBudget }: any) => {
+  const [showAddVisit, setShowAddVisit] = useState(false);
+  const [newVisitName, setNewVisitName] = useState('');
+  
   const defaultVisits: Visit[] = [
     { id: 'screen', name: 'Screen', timepoint: 'Screening', order: 0, color: '#3b82f6' },
     { id: 'day0', name: 'Day 0', timepoint: 'Baseline', order: 1, color: '#10b981' },
@@ -259,6 +303,8 @@ const VisitSchedulePanel = ({ budget, onUpdateBudget }: any) => {
     { id: 'month9', name: 'Month 9', timepoint: 'Month 9', order: 6, color: '#6b7280' }
   ];
 
+  const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6b7280', '#059669', '#dc2626', '#7c3aed'];
+
   // Initialize visits if empty
   React.useEffect(() => {
     if (budget.visits.length === 0) {
@@ -267,6 +313,32 @@ const VisitSchedulePanel = ({ budget, onUpdateBudget }: any) => {
   }, []);
 
   const visits = budget.visits.length > 0 ? budget.visits : defaultVisits;
+
+  const addVisit = () => {
+    if (!newVisitName.trim()) return;
+    
+    const newVisit: Visit = {
+      id: crypto.randomUUID(),
+      name: newVisitName.trim(),
+      timepoint: newVisitName.trim(),
+      order: visits.length,
+      color: colors[visits.length % colors.length]
+    };
+    
+    onUpdateBudget({
+      visits: [...visits, newVisit]
+    });
+    
+    setNewVisitName('');
+    setShowAddVisit(false);
+  };
+
+  const removeVisit = (visitId: string) => {
+    onUpdateBudget({
+      visits: visits.filter((v: Visit) => v.id !== visitId),
+      mappings: budget.mappings.filter((m: ProcedureVisitMapping) => m.visitId !== visitId)
+    });
+  };
 
   const toggleMapping = (procedureId: string, visitId: string) => {
     const existingMapping = budget.mappings.find(
@@ -299,85 +371,158 @@ const VisitSchedulePanel = ({ budget, onUpdateBudget }: any) => {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '1rem', borderBottom: '1px solid #e5e7eb', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: '1.125rem', fontWeight: '600', margin: 0 }}>Visit Schedule</h2>
-        <button
-          style={{
-            padding: '0.5rem 1rem',
-            background: '#10b981',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.375rem',
-            fontSize: '0.875rem',
-            cursor: 'pointer'
-          }}
-        >
-          + Add Visit
-        </button>
-      </div>
-      
-      <div style={{ flex: 1, overflow: 'auto', background: 'white' }}>
-        {/* Visit Headers */}
-        <div style={{ display: 'flex', position: 'sticky', top: 0, background: 'white', zIndex: 10, borderBottom: '2px solid #e5e7eb' }}>
-          <div style={{ width: '200px', padding: '0.75rem', fontWeight: '600', fontSize: '0.875rem' }}>
-            Procedure
-          </div>
-          {visits.map((visit: Visit) => (
-            <div
-              key={visit.id}
+      <div style={{ padding: '1rem', borderBottom: '1px solid #e5e7eb', background: 'white' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: showAddVisit ? '1rem' : '0' }}>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: '600', margin: 0 }}>Visit Schedule</h2>
+          <button
+            onClick={() => setShowAddVisit(!showAddVisit)}
+            style={{
+              padding: '0.5rem 1rem',
+              background: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.375rem',
+              fontSize: '0.875rem',
+              cursor: 'pointer'
+            }}
+          >
+            + Add Visit
+          </button>
+        </div>
+        {showAddVisit && (
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <input
+              type="text"
+              placeholder="Visit name (e.g., Month 12)"
+              value={newVisitName}
+              onChange={(e) => setNewVisitName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && addVisit()}
               style={{
                 flex: 1,
-                minWidth: '100px',
-                padding: '0.75rem 0.5rem',
-                textAlign: 'center',
-                fontWeight: '600',
+                padding: '0.5rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem'
+              }}
+            />
+            <button
+              onClick={addVisit}
+              style={{
+                padding: '0.5rem 1rem',
+                background: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.375rem',
                 fontSize: '0.875rem',
-                background: visit.color || '#3b82f6',
-                color: 'white'
+                cursor: 'pointer'
               }}
             >
-              {visit.name}
-            </div>
-          ))}
-        </div>
-
-        {/* Procedure Rows */}
-        {budget.procedures.map((procedure: Procedure) => (
-          <div key={procedure.id} style={{ display: 'flex', borderBottom: '1px solid #e5e7eb' }}>
-            <div style={{
-              width: '200px',
-              padding: '0.75rem',
-              fontSize: '0.875rem',
-              borderRight: '1px solid #e5e7eb',
-              background: '#f9fafb'
-            }}>
-              {procedure.name}
+              Add
+            </button>
+            <button
+              onClick={() => setShowAddVisit(false)}
+              style={{
+                padding: '0.5rem 1rem',
+                background: '#6b7280',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      </div>
+      
+      <div style={{ flex: 1, overflowX: 'auto', overflowY: 'auto', background: 'white' }}>
+        <div style={{ minWidth: `${200 + visits.length * 120}px` }}>
+          {/* Visit Headers */}
+          <div style={{ display: 'flex', position: 'sticky', top: 0, background: 'white', zIndex: 10, borderBottom: '2px solid #e5e7eb' }}>
+            <div style={{ width: '200px', padding: '0.75rem', fontWeight: '600', fontSize: '0.875rem', borderRight: '1px solid #e5e7eb' }}>
+              Procedure
             </div>
             {visits.map((visit: Visit) => (
               <div
                 key={visit.id}
                 style={{
-                  flex: 1,
-                  minWidth: '100px',
-                  padding: '0.75rem',
+                  width: '120px',
+                  padding: '0.75rem 0.5rem',
                   textAlign: 'center',
-                  borderRight: '1px solid #e5e7eb'
+                  fontWeight: '600',
+                  fontSize: '0.875rem',
+                  background: visit.color || '#3b82f6',
+                  color: 'white',
+                  borderRight: '1px solid #e5e7eb',
+                  position: 'relative'
                 }}
               >
-                <input
-                  type="checkbox"
-                  checked={isMapped(procedure.id, visit.id)}
-                  onChange={() => toggleMapping(procedure.id, visit.id)}
+                <div>{visit.name}</div>
+                <button
+                  onClick={() => removeVisit(visit.id)}
                   style={{
+                    position: 'absolute',
+                    top: '2px',
+                    right: '2px',
+                    background: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '50%',
                     width: '18px',
                     height: '18px',
-                    cursor: 'pointer'
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
-                />
+                  title="Remove visit"
+                >
+                  ×
+                </button>
               </div>
             ))}
           </div>
-        ))}
+
+          {/* Procedure Rows */}
+          {budget.procedures.map((procedure: Procedure) => (
+            <div key={procedure.id} style={{ display: 'flex', borderBottom: '1px solid #e5e7eb' }}>
+              <div style={{
+                width: '200px',
+                padding: '0.75rem',
+                fontSize: '0.875rem',
+                borderRight: '1px solid #e5e7eb',
+                background: '#f9fafb'
+              }}>
+                {procedure.name}
+              </div>
+              {visits.map((visit: Visit) => (
+                <div
+                  key={visit.id}
+                  style={{
+                    width: '120px',
+                    padding: '0.75rem',
+                    textAlign: 'center',
+                    borderRight: '1px solid #e5e7eb'
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isMapped(procedure.id, visit.id)}
+                    onChange={() => toggleMapping(procedure.id, visit.id)}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      cursor: 'pointer'
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -676,40 +821,49 @@ function App() {
           gap: '1rem',
           justifyContent: 'center'
         }}>
-          <button style={{
-            padding: '0.75rem 1.5rem',
-            background: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.5rem',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => exportToPDF(budget, calculations)}
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.5rem',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
             Export as PDF
           </button>
-          <button style={{
-            padding: '0.75rem 1.5rem',
-            background: '#059669',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.5rem',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => exportToExcel(budget, calculations)}
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: '#059669',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.5rem',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
             Export as Excel
           </button>
-          <button style={{
-            padding: '0.75rem 1.5rem',
-            background: '#dc2626',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.5rem',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}>
+          <button 
+            onClick={() => exportToCSV(budget, calculations)}
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: '#dc2626',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.5rem',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
             Export as CSV
           </button>
         </div>
