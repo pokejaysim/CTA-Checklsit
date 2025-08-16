@@ -263,10 +263,17 @@ body {
         }
 
         @media print {
+            @page {
+                margin: 0.5in;
+                size: letter;
+            }
+
             body {
                 background-color: #fff;
                 padding: 0;
                 margin: 0;
+                transform: scale(0.95);
+                transform-origin: top left;
             }
 
             .header {
@@ -368,21 +375,40 @@ body {
                 color: black;
             }
 
+            /* Checkbox item layout adjustments for print */
+            .checkbox-item {
+                display: block !important;
+                margin: 8px 0 !important;
+                page-break-inside: avoid;
+            }
+
+            .checkbox-item input[type="checkbox"] {
+                display: inline-block !important;
+                margin-right: 8px !important;
+                vertical-align: top !important;
+            }
+
+            .checkbox-label {
+                display: inline !important;
+                margin-right: 5px !important;
+            }
+
             /* Section reference styling for print */
             .section-ref {
                 border: none !important;
                 background: transparent !important;
                 padding: 0 !important;
-                margin-left: 5px !important;
-                font-size: 12px !important;
+                margin: 0 !important;
+                font-size: 11px !important;
                 font-weight: bold !important;
                 color: #00669b !important;
                 width: auto !important;
                 display: inline !important;
+                max-width: none !important;
             }
 
             .section-ref:not(:empty)::before {
-                content: '[';
+                content: ' [';
                 color: #00669b;
             }
 
