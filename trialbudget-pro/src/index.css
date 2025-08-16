@@ -8,7 +8,7 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f8fafc;
   min-height: 100vh;
   color: #333;
   line-height: 1.6;
@@ -18,35 +18,6 @@ body {
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-}
-
-/* Basic styling without Tailwind */
-.workspace-header {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 1rem;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-
-.panel {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-right: 1px solid #e5e7eb;
-  height: 100%;
-  overflow-y: auto;
-}
-
-.panel-header {
-  padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
-  background: rgba(249, 250, 251, 0.8);
-  backdrop-filter: blur(4px);
-  position: sticky;
-  top: 0;
-  z-index: 10;
 }
 
 /* Custom scrollbar styles */
