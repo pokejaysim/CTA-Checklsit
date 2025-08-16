@@ -282,7 +282,6 @@ body {
 
             .button-container,
             #fileInput,
-            .section-ref,
             .progress-bar-container,
             .section-legend {
                 display: none !important;
@@ -367,5 +366,28 @@ body {
                 line-height: 14px;
                 font-size: 12px;
                 color: black;
+            }
+
+            /* Section reference styling for print */
+            .section-ref {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                margin-left: 5px !important;
+                font-size: 12px !important;
+                font-weight: bold !important;
+                color: #00669b !important;
+                width: auto !important;
+                display: inline !important;
+            }
+
+            .section-ref:not(:empty)::before {
+                content: '[';
+                color: #00669b;
+            }
+
+            .section-ref:not(:empty)::after {
+                content: ']';
+                color: #00669b;
             }
         }
