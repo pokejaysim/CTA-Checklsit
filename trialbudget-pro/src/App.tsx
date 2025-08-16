@@ -72,89 +72,60 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-purple-800">
+    <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'}}>
       {/* Workspace Header */}
       <header className="workspace-header">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-purple-600 rounded-lg">
-                <span className="text-white text-xl">📊</span>
+        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+          <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+            <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+              <div style={{padding: '0.5rem', background: '#8b5cf6', borderRadius: '0.5rem'}}>
+                <span style={{color: 'white', fontSize: '1.25rem'}}>📊</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">TrialBudget Pro</h1>
-                <p className="text-purple-100 text-sm">Clinical Trial Budget Calculator</p>
+                <h1 style={{fontSize: '1.25rem', fontWeight: 'bold', color: 'white', margin: 0}}>TrialBudget Pro</h1>
+                <p style={{color: 'rgba(255,255,255,0.8)', fontSize: '0.875rem', margin: 0}}>Clinical Trial Budget Calculator</p>
               </div>
             </div>
           </div>
           
-          <div className="flex items-center space-x-4">
-            {/* Study Info */}
-            <div className="bg-white/10 rounded-lg px-4 py-2">
-              <input
-                type="text"
-                placeholder="Study Title"
-                value={budget.title}
-                onChange={(e) => updateBudget({ title: e.target.value })}
-                className="bg-transparent text-white placeholder-purple-200 border-none focus:outline-none text-sm font-medium"
-              />
-            </div>
+          <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+            <input
+              type="text"
+              placeholder="Study Title"
+              value={budget.title}
+              onChange={(e) => updateBudget({ title: e.target.value })}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: 'none',
+                borderRadius: '0.5rem',
+                padding: '0.5rem 1rem',
+                color: 'white',
+                fontSize: '0.875rem'
+              }}
+            />
             
-            {/* Cost Tier Selector */}
-            <select
-              value={costTier}
-              onChange={(e) => setCostTier(e.target.value as CostTier)}
-              className="bg-white/10 text-white border border-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
+            <a
+              href="../index.html"
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+                textDecoration: 'none',
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}
             >
-              <option value="academic" className="text-gray-900">Academic</option>
-              <option value="commercial" className="text-gray-900">Commercial</option>
-              <option value="government" className="text-gray-900">Government</option>
-            </select>
-            
-            {/* Currency Selector */}
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              className="bg-white/10 text-white border border-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-white/50"
-            >
-              <option value="USD" className="text-gray-900">USD ($)</option>
-              <option value="EUR" className="text-gray-900">EUR (€)</option>
-              <option value="GBP" className="text-gray-900">GBP (£)</option>
-              <option value="CAD" className="text-gray-900">CAD ($)</option>
-              <option value="AUD" className="text-gray-900">AUD ($)</option>
-            </select>
-            
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setShowDashboard(!showDashboard)}
-                className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
-                {showDashboard ? 'Hide' : 'Show'} Dashboard
-              </button>
-              
-              <button
-                onClick={handleNewBudget}
-                className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
-                New Budget
-              </button>
-              
-              <a
-                href="../index.html"
-                className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
-                ← Workspace
-              </a>
-            </div>
+              ← Workspace
+            </a>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-80px)]">
+      <div style={{display: 'flex', height: 'calc(100vh - 80px)'}}>
         {/* Study Procedures Panel */}
-        <div className="w-80 panel">
+        <div style={{width: '320px'}} className="panel">
           <StudyProceduresPanel
             budget={budget}
             onUpdateBudget={updateBudget}
@@ -162,7 +133,7 @@ function App() {
         </div>
 
         {/* Cost Management Panel */}
-        <div className="w-64 panel">
+        <div style={{width: '256px'}} className="panel">
           <CostManagementPanel
             budget={budget}
             costTier={costTier}
@@ -172,23 +143,12 @@ function App() {
         </div>
 
         {/* Visit Schedule Panel */}
-        <div className="flex-1 panel border-r-0">
+        <div style={{flex: 1}} className="panel">
           <VisitSchedulePanel
             budget={budget}
             onUpdateBudget={updateBudget}
           />
         </div>
-
-        {/* Budget Dashboard (Collapsible) */}
-        {showDashboard && (
-          <div className="w-80 panel border-r-0">
-            <BudgetDashboard
-              budget={budget}
-              costTier={costTier}
-              currency={currency}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
