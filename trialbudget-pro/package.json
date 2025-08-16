@@ -2,6 +2,7 @@
   "name": "trialbudget-pro",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.12",
     "@testing-library/dom": "^10.4.1",
