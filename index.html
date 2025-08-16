@@ -3,146 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinical Trial Management Suite</title>
+    <title>Clinical Trial Workspace</title>
     <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/landing.css">
+    <link rel="stylesheet" href="assets/css/workspace.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Header -->
-    <header>
+    <!-- Workspace Header -->
+    <header class="workspace-header">
         <div class="container">
-            <h1>Clinical Trial Management Suite</h1>
-            <nav>
-                <ul>
-                    <li><a href="#tools">Tools</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#about">About</a></li>
-                </ul>
-            </nav>
+            <div class="header-content">
+                <div class="workspace-title">
+                    <h1>Clinical Trial Workspace</h1>
+                    <p id="greeting" class="greeting">Good morning! Ready to get things done?</p>
+                </div>
+                <div class="datetime-widget">
+                    <div id="current-time" class="time"></div>
+                    <div id="current-date" class="date"></div>
+                </div>
+            </div>
+            <div class="search-container">
+                <input type="text" id="tool-search" placeholder="Search tools..." class="search-input">
+                <span class="search-icon">🔍</span>
+            </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1>Streamline Your Clinical Trials</h1>
-            <p>Comprehensive tools for managing clinical trial agreements, budgets, and documentation with precision and efficiency.</p>
-            <a href="#tools" class="btn btn-primary">Explore Our Tools</a>
-        </div>
-    </section>
-
     <!-- Tools Section -->
-    <section id="tools" class="section">
+    <main class="workspace-main">
         <div class="container">
             <div class="section-header">
-                <h2>Clinical Trial Management Tools</h2>
-                <p>Professional tools designed for research coordinators, investigators, and trial sponsors - from contract management to comprehensive note-taking</p>
+                <h2>Your Tools</h2>
             </div>
             
             <div class="tools-grid">
                 <!-- Budget Forecaster Tool -->
-                <div class="tool-card">
-                    <span class="icon">💰</span>
-                    <h3>Clinical Trial Budget Forecaster</h3>
-                    <p>Professional budget planning and forecasting for clinical trials. Calculate startup fees, visit schedules, personnel costs, and generate comprehensive revenue forecasts with modern charts and export capabilities.</p>
-                    <a href="budget-app/index.html" class="btn btn-primary">Launch Budget Forecaster</a>
+                <div class="tool-card" data-tool="budget">
+                    <div class="tool-icon">💰</div>
+                    <div class="tool-content">
+                        <h3>Budget Forecaster</h3>
+                        <p>Calculate costs, revenue forecasts, and export reports</p>
+                    </div>
+                    <a href="budget-app/index.html" class="tool-button">Open</a>
                 </div>
 
                 <!-- CTA Checklist Tool -->
-                <div class="tool-card">
-                    <span class="icon">📋</span>
-                    <h3>Clinical Trial Agreement Checklist</h3>
-                    <p>Ensure comprehensive review of all clinical trial agreement components with our interactive checklist. Track progress, add notes, and never miss critical contract elements.</p>
-                    <a href="cta-checklist.html" class="btn btn-primary">Launch Checklist</a>
+                <div class="tool-card" data-tool="checklist">
+                    <div class="tool-icon">📋</div>
+                    <div class="tool-content">
+                        <h3>Agreement Checklist</h3>
+                        <p>Interactive checklist for clinical trial agreements</p>
+                    </div>
+                    <a href="cta-checklist.html" class="tool-button">Open</a>
                 </div>
 
                 <!-- CTA Checklist Beta Tool -->
-                <div class="tool-card beta-card">
-                    <span class="icon">📋</span>
-                    <div class="card-header">
-                        <h3>CTA Checklist <span class="beta-badge">BETA</span></h3>
+                <div class="tool-card beta-card" data-tool="checklist-beta">
+                    <div class="tool-icon">✨</div>
+                    <div class="tool-content">
+                        <h3>Agreement Checklist <span class="beta-badge">BETA</span></h3>
+                        <p>Enhanced version with advanced features</p>
                     </div>
-                    <p>Enhanced version with advanced features: collapsible sections, search & filter, dark mode, section-wise progress tracking, version history, and improved export options.</p>
-                    <div class="card-actions">
-                        <a href="cta-checklist-beta.html" class="btn btn-primary">Try Beta Version</a>
-                        <small class="beta-note">Try the new features while keeping your original checklist</small>
-                    </div>
+                    <a href="cta-checklist-beta.html" class="tool-button">Try Beta</a>
                 </div>
 
                 <!-- Contract Tracker Tool -->
-                <div class="tool-card">
-                    <span class="icon">📄</span>
-                    <h3>Contract Tracker</h3>
-                    <p>Manage all your clinical trial contracts in one place. Track status, due dates, and maintain detailed notes with our intuitive contract management system.</p>
-                    <a href="contract-tracker.html" class="btn btn-primary">Launch Tracker</a>
+                <div class="tool-card" data-tool="contracts">
+                    <div class="tool-icon">📄</div>
+                    <div class="tool-content">
+                        <h3>Contract Tracker</h3>
+                        <p>Manage contracts, track status, and due dates</p>
+                    </div>
+                    <a href="contract-tracker.html" class="tool-button">Open</a>
                 </div>
 
                 <!-- Clinical Trial Notes Tool -->
-                <div class="tool-card">
-                    <span class="icon">📝</span>
-                    <h3>Clinical Trial Notes</h3>
-                    <p>Organize your research notes with our modern note-taking system. Features rich text editing, folder organization, tagging, search, and export capabilities.</p>
-                    <a href="notes-app/index.html" class="btn btn-primary">Launch Notes</a>
+                <div class="tool-card" data-tool="notes">
+                    <div class="tool-icon">📝</div>
+                    <div class="tool-content">
+                        <h3>Research Notes</h3>
+                        <p>Modern note-taking with organization and search</p>
+                    </div>
+                    <a href="notes-app/index.html" class="tool-button">Open</a>
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="features">
-        <div class="container">
-            <div class="section-header">
-                <h2>Why Choose Our Tools?</h2>
-                <p>Built by clinical research professionals, for clinical research professionals</p>
-            </div>
-
-            <div class="features-grid">
-                <div class="feature">
-                    <div class="feature-icon">🔒</div>
-                    <h4>Secure & Private</h4>
-                    <p>All data is stored locally in your browser. No sensitive information ever leaves your device.</p>
-                </div>
-
-                <div class="feature">
-                    <div class="feature-icon">💾</div>
-                    <h4>Save & Export</h4>
-                    <p>Save your work and export to multiple formats including PDF, Excel, and JSON for easy sharing.</p>
-                </div>
-
-                <div class="feature">
-                    <div class="feature-icon">📱</div>
-                    <h4>Mobile Friendly</h4>
-                    <p>Access your tools from any device. Responsive design ensures functionality on desktop, tablet, and mobile.</p>
-                </div>
-
-                <div class="feature">
-                    <div class="feature-icon">🎯</div>
-                    <h4>Industry Focused</h4>
-                    <p>Designed specifically for clinical trials with input from experienced research coordinators and PIs.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="container">
-            <div class="about-content">
-                <h2>About Clinical Trial Management Suite</h2>
-                <p>Our suite of tools is designed to simplify the complex administrative tasks associated with clinical trials. From initial budget planning to ongoing agreement management, we provide the digital infrastructure that research teams need to focus on what matters most - advancing medical science and improving patient outcomes.</p>
-                <p>Built with modern web technologies and a deep understanding of clinical research workflows, our tools are continuously updated based on user feedback and industry best practices.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Call to Action -->
-    <section class="cta">
-        <div class="container">
-            <h2>Ready to Streamline Your Clinical Trials?</h2>
-            <p>Start using our free tools today and experience the difference in your workflow.</p>
-            <a href="#tools" class="btn">Get Started Now</a>
-        </div>
-    </section>
+    </main>
 
     <!-- Footer -->
     <footer>
@@ -151,20 +99,61 @@
         </div>
     </footer>
 
-    <!-- Smooth Scrolling Script -->
+    <!-- Workspace JavaScript -->
     <script>
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
+        // Update time and date
+        function updateDateTime() {
+            const now = new Date();
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US', timeOptions);
+            document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', dateOptions);
+        }
+
+        // Update greeting based on time of day
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            let greeting = 'Good evening! Time to wrap up.';
+            
+            if (hour < 12) {
+                greeting = 'Good morning! Ready to get things done?';
+            } else if (hour < 17) {
+                greeting = 'Good afternoon! Keep up the great work!';
+            }
+            
+            document.getElementById('greeting').textContent = greeting;
+        }
+
+        // Search functionality
+        function initSearch() {
+            const searchInput = document.getElementById('tool-search');
+            const toolCards = document.querySelectorAll('.tool-card');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                toolCards.forEach(card => {
+                    const toolName = card.querySelector('h3').textContent.toLowerCase();
+                    const toolDesc = card.querySelector('p').textContent.toLowerCase();
+                    
+                    if (toolName.includes(searchTerm) || toolDesc.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = searchTerm ? 'none' : 'block';
+                    }
+                });
             });
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDateTime();
+            updateGreeting();
+            initSearch();
+            
+            // Update time every minute
+            setInterval(updateDateTime, 60000);
         });
     </script>
 </body>

@@ -283,8 +283,6 @@ body {
             .button-container,
             #fileInput,
             .section-ref,
-            .notes-input,
-            #general-notes,
             .progress-bar-container,
             .section-legend {
                 display: none !important;
@@ -295,6 +293,31 @@ body {
                 background-color: #fafafa !important;
                 -webkit-print-color-adjust: exact;
                 page-break-inside: avoid;
+            }
+
+            /* Print-friendly styling for notes sections */
+            .notes-input,
+            #general-notes {
+                border: 1px solid #ccc !important;
+                background-color: white !important;
+                min-height: 40px !important;
+                font-size: 12px !important;
+                padding: 8px !important;
+                margin-bottom: 10px !important;
+                resize: none !important;
+                page-break-inside: avoid;
+            }
+
+            .notes-section {
+                margin-top: 10px !important;
+                page-break-inside: avoid;
+            }
+
+            .notes-label {
+                font-weight: bold !important;
+                color: #00669b !important;
+                margin-bottom: 5px !important;
+                display: block !important;
             }
 
             .section-title {
