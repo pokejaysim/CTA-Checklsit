@@ -528,7 +528,11 @@
         <button class="btn btn-danger" onclick="removeLastVisitColumn()">Remove Last Visit</button>
         <button class="btn btn-info" onclick="calculateAll()">Recalculate All</button>
         <button class="btn btn-secondary" onclick="exportToExcel()">Export to CSV</button>
+        <button class="btn btn-primary" onclick="saveBudget()">Save Budget</button>
+        <button class="btn btn-secondary" onclick="loadBudget()">Load Budget</button>
+        <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
       </div>
+      <input type="file" id="loadBudgetFile" accept=".json" style="display: none;" onchange="handleFileLoad(event)">
 
       <!-- Invoiceables Section -->
       <h2 style="color:#2d3748; text-align:center; margin: 30px 0 15px; font-size:2rem; font-weight:700;">One-Time Study Costs & Invoiceables</h2>
@@ -1141,6 +1145,250 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = url; a.download = 'clinical-trial-budget.csv';
         document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      };
+
+      // Clear All function
+      window.clearAll = function(){
+        if (!confirm('Are you sure you want to clear all numeric values? This will reset all costs, quantities, and overhead percentages to 0.')) {
+          return;
+        }
+        
+        // Clear study info numeric fields
+        const enrollment = $('#enrollment');
+        if (enrollment) enrollment.value = '';
+        
+        // Clear default overhead
+        const defaultOverhead = $('#defaultOverhead');
+        if (defaultOverhead) defaultOverhead.value = '25';
+        
+        // Clear budget table numeric inputs
+        eachBudgetRow(tr => {
+          const costInput = $('.cost-input', tr);
+          const overheadInput = $('.overhead-input', tr);
+          const overheadCheck = $('.overhead-checkbox', tr);
+          
+          if (costInput) costInput.value = '0';
+          if (overheadInput) overheadInput.value = '0';
+          if (overheadCheck) overheadCheck.checked = false;
+          
+          // Clear visit quantities
+          const tds = $$('td', tr);
+          const visitCount = getVisitCount();
+          for (let i = 0; i < visitCount; i++) {
+            const input = $('input[type="number"]', tds[4 + i]);
+            if (input) input.value = '0';
+          }
+        });
+        
+        // Clear invoiceables
+        $$('#invoiceablesTable tbody tr').forEach(tr => {
+          const costInput = $('.invoiceable-cost', tr);
+          const overheadInput = $('.invoiceable-overhead', tr);
+          const overheadCheck = $('.invoiceable-overhead-check', tr);
+          
+          if (costInput) costInput.value = '0';
+          if (overheadInput) overheadInput.value = '0';
+          if (overheadCheck) overheadCheck.checked = false;
+        });
+        
+        // Recalculate everything
+        calculateAll();
+      };
+
+      // Save Budget function
+      window.saveBudget = function(){
+        const budgetData = {
+          studyInfo: {
+            title: $('#studyTitle')?.value || '',
+            protocolNumber: $('#protocolNumber')?.value || '',
+            siteName: $('#siteName')?.value || '',
+            pi: $('#pi')?.value || '',
+            enrollment: $('#enrollment')?.value || '',
+            duration: $('#duration')?.value || ''
+          },
+          overheadSettings: {
+            defaultOverhead: $('#defaultOverhead')?.value || '25'
+          },
+          visitHeaders: getVisitNames(),
+          procedures: [],
+          invoiceables: []
+        };
+        
+        // Capture procedure data
+        eachBudgetRow(tr => {
+          const procedure = {
+            name: $('.procedure-input', tr)?.value || '',
+            cost: $('.cost-input', tr)?.value || '0',
+            overhead: $('.overhead-input', tr)?.value || '0',
+            applyOverhead: $('.overhead-checkbox', tr)?.checked || false,
+            visits: []
+          };
+          
+          const tds = $$('td', tr);
+          const visitCount = getVisitCount();
+          for (let i = 0; i < visitCount; i++) {
+            const input = $('input[type="number"]', tds[4 + i]);
+            procedure.visits.push(input?.value || '0');
+          }
+          
+          budgetData.procedures.push(procedure);
+        });
+        
+        // Capture invoiceables data
+        $$('#invoiceablesTable tbody tr').forEach(tr => {
+          const invoiceable = {
+            category: $('.procedure-input', tr)?.value || '',
+            amount: $('.invoiceable-cost', tr)?.value || '0',
+            overhead: $('.invoiceable-overhead', tr)?.value || '0',
+            applyOverhead: $('.invoiceable-overhead-check', tr)?.checked || false,
+            description: $$('.procedure-input', tr)[1]?.value || ''
+          };
+          budgetData.invoiceables.push(invoiceable);
+        });
+        
+        // Create and download file
+        const json = JSON.stringify(budgetData, null, 2);
+        const blob = new Blob([json], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+        const filename = `budget-${budgetData.studyInfo.title || 'untitled'}-${timestamp}.json`.replace(/[^a-z0-9.-]/gi, '_');
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      };
+
+      // Load Budget function
+      window.loadBudget = function(){
+        $('#loadBudgetFile').click();
+      };
+
+      window.handleFileLoad = function(event){
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const budgetData = JSON.parse(e.target.result);
+            
+            // Validate basic structure
+            if (!budgetData || typeof budgetData !== 'object') {
+              throw new Error('Invalid budget file format');
+            }
+            
+            // Load study info
+            if (budgetData.studyInfo) {
+              const si = budgetData.studyInfo;
+              if ($('#studyTitle')) $('#studyTitle').value = si.title || '';
+              if ($('#protocolNumber')) $('#protocolNumber').value = si.protocolNumber || '';
+              if ($('#siteName')) $('#siteName').value = si.siteName || '';
+              if ($('#pi')) $('#pi').value = si.pi || '';
+              if ($('#enrollment')) $('#enrollment').value = si.enrollment || '';
+              if ($('#duration')) $('#duration').value = si.duration || '';
+            }
+            
+            // Load overhead settings
+            if (budgetData.overheadSettings?.defaultOverhead) {
+              if ($('#defaultOverhead')) $('#defaultOverhead').value = budgetData.overheadSettings.defaultOverhead;
+            }
+            
+            // Clear existing data
+            const tbody = $('#budgetTable tbody');
+            tbody.innerHTML = '';
+            
+            // Rebuild visit headers if needed
+            if (budgetData.visitHeaders && Array.isArray(budgetData.visitHeaders)) {
+              const theadRow = $('#budgetTable thead tr');
+              const existingHeaders = $$('.visit-header', theadRow);
+              
+              // Remove existing visit headers
+              existingHeaders.forEach(header => header.remove());
+              
+              // Add new headers
+              budgetData.visitHeaders.forEach(visitName => {
+                const th = document.createElement('th');
+                th.className = 'visit-header';
+                th.setAttribute('draggable','true');
+                th.setAttribute('ondragstart','handleDragStart(event)');
+                th.setAttribute('ondragover','handleDragOver(event)');
+                th.setAttribute('ondrop','handleDrop(event)');
+                th.setAttribute('ondragend','handleDragEnd(event)');
+                th.innerHTML = `
+                  <input type="text" value="${visitName}" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                `;
+                theadRow.insertBefore(th, theadRow.lastElementChild);
+              });
+            }
+            
+            // Load procedures
+            if (budgetData.procedures && Array.isArray(budgetData.procedures)) {
+              budgetData.procedures.forEach(proc => {
+                const tr = document.createElement('tr');
+                const visitCount = getVisitCount();
+                
+                tr.innerHTML = `
+                  <td class="procedure-column"><input type="text" class="procedure-input" value="${proc.name || ''}"></td>
+                  <td class="cost-column"><input type="number" class="cost-input" value="${proc.cost || '0'}" step="0.01"></td>
+                  <td class="overhead-column"><input type="number" class="overhead-input" value="${proc.overhead || '0'}" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+                  <td class="overhead-enable-column"><input type="checkbox" class="overhead-checkbox" ${proc.applyOverhead ? 'checked' : ''} onchange="calculateRow(this)"></td>
+                `;
+                
+                // Add visit quantity inputs
+                for (let i = 0; i < visitCount; i++) {
+                  const td = document.createElement('td');
+                  const value = proc.visits && proc.visits[i] ? proc.visits[i] : '0';
+                  td.innerHTML = `<input type="number" value="${value}" min="0" step="1" onchange="calculateRow(this)">`;
+                  tr.appendChild(td);
+                }
+                
+                // Add total cell
+                const totalTd = document.createElement('td');
+                totalTd.className = 'calculated-cell';
+                totalTd.textContent = '0.00';
+                tr.appendChild(totalTd);
+                
+                tbody.appendChild(tr);
+              });
+            }
+            
+            // Load invoiceables
+            if (budgetData.invoiceables && Array.isArray(budgetData.invoiceables)) {
+              const invTbody = $('#invoiceablesTable tbody');
+              invTbody.innerHTML = '';
+              
+              budgetData.invoiceables.forEach(inv => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                  <td style="background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%); text-align:left;">
+                    <input type="text" class="procedure-input" value="${inv.category || ''}" style="width:280px;">
+                  </td>
+                  <td><input type="number" class="invoiceable-cost" value="${inv.amount || '0'}" step="0.01" onchange="calculateInvoiceables()" style="width:130px;"></td>
+                  <td><input type="number" class="invoiceable-overhead" value="${inv.overhead || '0'}" min="0" max="100" step="0.1" onchange="calculateInvoiceables()" style="width:80px;"></td>
+                  <td><input type="checkbox" class="invoiceable-overhead-check" ${inv.applyOverhead ? 'checked' : ''} onchange="calculateInvoiceables()"></td>
+                  <td><input type="text" class="procedure-input" value="${inv.description || ''}" style="width:280px;"></td>
+                `;
+                invTbody.appendChild(tr);
+              });
+            }
+            
+            // Recalculate everything
+            calculateAll();
+            
+            alert('Budget loaded successfully!');
+            
+          } catch (error) {
+            alert('Error loading budget file: ' + error.message);
+          }
+        };
+        
+        reader.readAsText(file);
+        event.target.value = ''; // Reset file input
       };
 
       // Delegated recalcs
