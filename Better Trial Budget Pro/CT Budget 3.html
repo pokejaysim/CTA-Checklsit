@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clinical Trial Budget Template with Overhead</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: 0; padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh; color: #2d3748;
+    }
+    .container {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      padding: 30px; border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    h1 {
+      color:#2d3748; text-align:center; margin-bottom: 20px;
+      font-size:2.5rem; font-weight:700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+
+    /* Simple tabs */
+    .tabs {
+      display:flex; gap:10px; justify-content:center; margin-bottom: 20px;
+    }
+    .tab-btn {
+      padding:10px 18px; border:none; border-radius:999px; cursor:pointer;
+      font-weight:700; letter-spacing:.3px; color:#fff;
+      background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      box-shadow:0 4px 12px rgba(0,0,0,0.15); transition:.2s;
+    }
+    .tab-btn:hover { transform: translateY(-1px); }
+    .tab-btn.active { background: linear-gradient(135deg,#48bb78 0%,#38a169 100%); }
+    .tab-section { display:none; }
+    .tab-section.active { display:block; }
+
+    .study-info {
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      padding: 25px; border-radius: 12px; margin-bottom: 20px;
+      display: grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+      gap: 20px; border: 1px solid #e2e8f0;
+    }
+    .study-info input {
+      padding:16px 20px; border:2px solid #e2e8f0; border-radius:8px; font-size:16px;
+      transition: all .3s ease; background:white; min-height:50px;
+    }
+    .study-info input:focus {
+      outline:none; border-color:#667eea; box-shadow:0 0 0 3px rgba(102,126,234,.1);
+      transform: translateY(-1px);
+    }
+
+    .overhead-controls {
+      background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+      padding:20px; border-radius:12px; margin-bottom: 20px; border:1px solid #fc8181;
+    }
+    .overhead-controls h3 { margin:0 0 15px 0; color:#742a2a; font-size:1.2rem; font-weight:600; }
+    .overhead-controls-grid {
+      display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+      gap:15px; align-items:center;
+    }
+    .overhead-control { display:flex; align-items:center; gap:10px; }
+    .overhead-control label { font-weight:500; color:#742a2a; }
+    .overhead-control input[type="number"] {
+      width:80px; padding:8px; border:2px solid #fc8181; border-radius:6px; text-align:center; background:white;
+    }
+
+    .table-container { overflow-x:auto; background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,.05); margin-bottom:20px; }
+    .budget-table { width:100%; border-collapse: collapse; font-size:14px; }
+    .budget-table thead { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color:white; }
+    .budget-table th {
+      padding:16px 12px; text-align:center; font-weight:600; font-size:13px; letter-spacing:.5px; text-transform:uppercase;
+      border-right:1px solid rgba(255,255,255,0.2); position:sticky; top:0; z-index:10;
+    }
+    .budget-table th:last-child { border-right:none; }
+    .budget-table td {
+      padding:12px; text-align:center; border-bottom:1px solid #e2e8f0; border-right:1px solid #f7fafc; transition: background-color .2s ease;
+    }
+    .budget-table td:last-child { border-right:none; }
+    .budget-table tbody tr:hover { background-color:#f7fafc; }
+
+    .procedure-column {
+      background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+      text-align:left !important; min-width:220px; position:sticky; left:0; z-index:5; border-right:2px solid #cbd5e0 !important;
+    }
+    .cost-column { background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%); min-width:100px; font-weight:600; }
+    .overhead-column { background: linear-gradient(135deg, #fff2cd 0%, #fed7aa 100%); min-width:80px; font-weight:600; }
+    .overhead-enable-column { background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%); min-width:70px; }
+    .calculated-cell { background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%); font-weight:700; color:#22543d; }
+
+    .total-row { background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%); font-weight:700; color:#2a4365; }
+    .total-row .calculated-cell:last-child {
+      background: linear-gradient(135deg, #fc8181 0%, #f56565 100%); color:white; font-size:16px; font-weight:800;
+    }
+
+    .visit-header {
+      background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%); color:white; min-width:90px; writing-mode: horizontal-tb;
+      cursor: move; position: relative; user-select: none;
+    }
+    .visit-header:hover { background: linear-gradient(135deg, #5a67d8 0%, #0000e6 100%); transform: translateY(-1px); }
+    .visit-header.dragging { opacity:.5; transform: rotate(2deg); }
+    .visit-header.drag-over { border-left:4px solid #ffd700; border-right:4px solid #ffd700; }
+    .visit-header input {
+      background:transparent; border:none; color:white; text-align:center; font-weight:600; font-size:13px; width:100%; padding:4px;
+    }
+    .visit-header input:focus { outline:2px solid rgba(255,255,255,.5); border-radius:4px; }
+    .visit-controls { position:absolute; top:2px; right:2px; opacity:0; transition: opacity .2s ease; }
+    .visit-header:hover .visit-controls { opacity:1; }
+    .visit-control-btn {
+      background: rgba(255,255,255,0.2); border:none; color:white; width:16px; height:16px; border-radius:2px; cursor:pointer; font-size:10px; margin-left:2px;
+    }
+    .visit-control-btn:hover { background: rgba(255,255,255,0.4); }
+    .drop-indicator { position:absolute; top:0; bottom:0; width:3px; background:#ffd700; z-index:1000; opacity:0; transition: opacity .2s ease; }
+    .drop-indicator.show { opacity:1; }
+
+    input[type="number"], input[type="text"] {
+      width:80px; padding:8px; border:2px solid #e2e8f0; border-radius:6px; text-align:center; font-size:13px; transition: all .2s ease; background:white;
+    }
+    input[type="number"]:focus, input[type="text"]:focus {
+      outline:none; border-color:#667eea; box-shadow:0 0 0 2px rgba(102,126,234,.2);
+    }
+    .procedure-input { width:190px; text-align:left; }
+    .cost-input { width:85px; background:rgba(255,255,255,0.9); font-weight:600; }
+    .overhead-input { width:70px; background:rgba(255,255,255,0.9); font-weight:600; }
+    .overhead-checkbox { transform: scale(1.2); cursor:pointer; }
+
+    .button-group { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom: 20px; }
+    .btn {
+      padding:12px 24px; border:none; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px;
+      transition: all .3s ease; text-transform:uppercase; letter-spacing:.5px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.2); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color:white; }
+    .btn-secondary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; }
+    .btn-danger { background: linear-gradient(135deg, #fc8181 0%, #f56565 100%); color:white; }
+    .btn-info { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color:white; }
+
+    .summary {
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      padding: 25px; border-radius: 12px; margin-top: 10px; border:1px solid #e2e8f0;
+    }
+    .summary h3 { color:#2d3748; margin-bottom:15px; font-size:1.5rem; font-weight:700; }
+    .summary-grid {
+      display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap:16px;
+    }
+    .summary-card {
+      background:white; border:1px solid #e2e8f0; border-radius:12px; padding:16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .summary-card h4 { margin:0 0 10px 0; font-size:1.1rem; color:#4a5568; }
+    .summary-row { display:flex; justify-content:space-between; margin:6px 0; font-size:15px; }
+    .summary-row strong { color:#2d3748; }
+    .summary-row span { font-weight:700; color:#2d3748; }
+
+    #grandTotal { color:#e53e3e; font-size:20px; font-weight:800; }
+
+    @media (max-width:768px){
+      body { padding:10px; }
+      .container { padding:20px; border-radius:15px; }
+      h1 { font-size:2rem; }
+      .study-info { grid-template-columns:1fr; }
+      .button-group { flex-direction:column; align-items:center; }
+      .btn { width:100%; max-width:300px; }
+    }
+
+    .budget-table tbody tr { transition: background-color .2s ease; }
+    .calculated-cell { transition: all .3s ease; }
+
+    .table-container::-webkit-scrollbar { height:8px; }
+    .table-container::-webkit-scrollbar-track { background:#f1f1f1; border-radius:10px; }
+    .table-container::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius:10px;
+    }
+    .table-container::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Clinical Trial Budget Template with Overhead</h1>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tabBudget" onclick="showSection('builderSection', this)">Budget</button>
+      <button class="tab-btn" id="tabSummary" onclick="showSection('summarySection', this)">Summary</button>
+    </div>
+
+    <!-- ===== BUILDER SECTION ===== -->
+    <section id="builderSection" class="tab-section active">
+      <div class="study-info">
+        <input type="text" placeholder="Study Title" id="studyTitle">
+        <input type="text" placeholder="Protocol Number" id="protocolNumber">
+        <input type="text" placeholder="Site Name" id="siteName">
+        <input type="text" placeholder="Principal Investigator" id="pi">
+        <input type="number" placeholder="Target Enrollment" id="enrollment" min="0" step="1">
+        <input type="text" placeholder="Study Duration" id="duration">
+      </div>
+
+      <div class="overhead-controls">
+        <h3>Global Overhead Settings</h3>
+        <div class="overhead-controls-grid">
+          <div class="overhead-control">
+            <label for="defaultOverhead">Default Overhead %:</label>
+            <input type="number" id="defaultOverhead" value="25" min="0" max="100" step="0.1" onchange="applyDefaultOverhead()">
+          </div>
+          <div class="overhead-control">
+            <button class="btn btn-secondary" onclick="enableAllOverhead()">Enable All Overhead</button>
+          </div>
+          <div class="overhead-control">
+            <button class="btn btn-secondary" onclick="disableAllOverhead()">Disable All Overhead</button>
+          </div>
+          <div class="overhead-control">
+            <button class="btn btn-info" onclick="applyDefaultOverhead()">Apply Default % to All</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <div class="table-container">
+          <table class="budget-table" id="budgetTable">
+            <thead>
+              <tr>
+                <th class="procedure-column">Procedure/Activity</th>
+                <th class="cost-column">Unit Cost</th>
+                <th class="overhead-column">Overhead %</th>
+                <th class="overhead-enable-column">Apply OH</th>
+
+                <!-- Visit headers -->
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Screening" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Baseline/Day 1" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Week 1" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Week 2" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Week 4" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Week 6" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Week 8" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Week 12" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Week 16" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Week 24" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Week 52" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="End of Study" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Follow-up 30d" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Follow-up 90d" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Unscheduled" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+                <th class="visit-header" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragend="handleDragEnd(event)">
+                  <input type="text" value="Early Term" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+                  <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+                </th>
+
+                <th style="background-color:#28a745; color:white;">Total Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Sample rows -->
+              <tr>
+                <td class="procedure-column"><input type="text" class="procedure-input" value="Informed Consent"></td>
+                <td class="cost-column"><input type="number" class="cost-input" value="0" step="0.01"></td>
+                <td class="overhead-column"><input type="number" class="overhead-input" value="0" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+                <td class="overhead-enable-column"><input type="checkbox" class="overhead-checkbox" onchange="calculateRow(this)"></td>
+                <!-- visits -->
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td class="calculated-cell">0.00</td>
+              </tr>
+              <tr>
+                <td class="procedure-column"><input type="text" class="procedure-input" value="Medical History"></td>
+                <td class="cost-column"><input type="number" class="cost-input" value="50" step="0.01"></td>
+                <td class="overhead-column"><input type="number" class="overhead-input" value="25" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+                <td class="overhead-enable-column"><input type="checkbox" class="overhead-checkbox" checked onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td class="calculated-cell">62.50</td>
+              </tr>
+              <tr>
+                <td class="procedure-column"><input type="text" class="procedure-input" value="Physical Examination"></td>
+                <td class="cost-column"><input type="number" class="cost-input" value="75" step="0.01"></td>
+                <td class="overhead-column"><input type="number" class="overhead-input" value="25" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+                <td class="overhead-enable-column"><input type="checkbox" class="overhead-checkbox" checked onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td class="calculated-cell">750.00</td>
+              </tr>
+              <tr>
+                <td class="procedure-column"><input type="text" class="procedure-input" value="Vital Signs"></td>
+                <td class="cost-column"><input type="number" class="cost-input" value="25" step="0.01"></td>
+                <td class="overhead-column"><input type="number" class="overhead-input" value="0" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+                <td class="overhead-enable-column"><input type="checkbox" class="overhead-checkbox" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td class="calculated-cell">400.00</td>
+              </tr>
+              <tr>
+                <td class="procedure-column"><input type="text" class="procedure-input" value="Laboratory Tests (CBC)"></td>
+                <td class="cost-column"><input type="number" class="cost-input" value="45" step="0.01"></td>
+                <td class="overhead-column"><input type="number" class="overhead-input" value="15" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+                <td class="overhead-enable-column"><input type="checkbox" class="overhead-checkbox" checked onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td class="calculated-cell">465.75</td>
+              </tr>
+              <tr>
+                <td class="procedure-column"><input type="text" class="procedure-input" value="ECG"></td>
+                <td class="cost-column"><input type="number" class="cost-input" value="85" step="0.01"></td>
+                <td class="overhead-column"><input type="number" class="overhead-input" value="20" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+                <td class="overhead-enable-column"><input type="checkbox" class="overhead-checkbox" checked onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td class="calculated-cell">408.00</td>
+              </tr>
+              <tr>
+                <td class="procedure-column"><input type="text" class="procedure-input" value="Study Drug Administration"></td>
+                <td class="cost-column"><input type="number" class="cost-input" value="100" step="0.01"></td>
+                <td class="overhead-column"><input type="number" class="overhead-input" value="30" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+                <td class="overhead-enable-column"><input type="checkbox" class="overhead-checkbox" checked onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td class="calculated-cell">1,430.00</td>
+              </tr>
+              <tr>
+                <td class="procedure-column"><input type="text" class="procedure-input" value="Adverse Event Assessment"></td>
+                <td class="cost-column"><input type="number" class="cost-input" value="30" step="0.01"></td>
+                <td class="overhead-column"><input type="number" class="overhead-input" value="10" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+                <td class="overhead-enable-column"><input type="checkbox" class="overhead-checkbox" checked onchange="calculateRow(this)"></td>
+                <td><input type="number" value="0" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td><input type="number" value="1" min="0" step="1" onchange="calculateRow(this)"></td>
+                <td class="calculated-cell">495.00</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td class="procedure-column">TOTAL PER VISIT</td>
+                <td class="cost-column">-</td>
+                <td class="overhead-column">-</td>
+                <td class="overhead-enable-column">-</td>
+                <!-- Per-visit totals (calc) -->
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell">0.00</td>
+                <td class="calculated-cell" style="background-color:#dc3545; color:white;">0.00</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="addRow()">Add Procedure Row</button>
+        <button class="btn btn-secondary" onclick="addVisitColumn()">Add Visit Event</button>
+        <button class="btn btn-danger" onclick="removeLastVisitColumn()">Remove Last Visit</button>
+        <button class="btn btn-info" onclick="calculateAll()">Recalculate All</button>
+        <button class="btn btn-secondary" onclick="exportToExcel()">Export to CSV</button>
+      </div>
+
+      <!-- Invoiceables Section -->
+      <h2 style="color:#2d3748; text-align:center; margin: 30px 0 15px; font-size:2rem; font-weight:700;">One-Time Study Costs & Invoiceables</h2>
+      <div class="table-container">
+        <table class="budget-table" id="invoiceablesTable">
+          <thead>
+          <tr>
+            <th style="background: linear-gradient(135deg, #38a169 0%, #2f855a 100%); color:white; text-align:left; min-width:300px;">Cost Category</th>
+            <th style="background: linear-gradient(135deg, #38a169 0%, #2f855a 100%); color:white; min-width:150px;">Amount</th>
+            <th style="background: linear-gradient(135deg, #38a169 0%, #2f855a 100%); color:white; min-width:100px;">Overhead %</th>
+            <th style="background: linear-gradient(135deg, #38a169 0%, #2f855a 100%); color:white; min-width:80px;">Apply OH</th>
+            <th style="background: linear-gradient(135deg, #38a169 0%, #2f855a 100%); color:white; min-width:300px;">Description/Notes</th>
+          </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%); text-align:left;">
+                <input type="text" class="procedure-input" value="Site Initiation Fee" style="width:280px;">
+              </td>
+              <td><input type="number" class="invoiceable-cost" value="2500" step="0.01" onchange="calculateInvoiceables()" style="width:130px;"></td>
+              <td><input type="number" class="invoiceable-overhead" value="25" min="0" max="100" step="0.1" onchange="calculateInvoiceables()" style="width:80px;"></td>
+              <td><input type="checkbox" class="invoiceable-overhead-check" checked onchange="calculateInvoiceables()"></td>
+              <td><input type="text" class="procedure-input" value="One-time fee for site setup and initiation visit" style="width:280px;"></td>
+            </tr>
+            <tr>
+              <td style="background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%); text-align:left;">
+                <input type="text" class="procedure-input" value="Training Costs" style="width:280px;">
+              </td>
+              <td><input type="number" class="invoiceable-cost" value="1500" step="0.01" onchange="calculateInvoiceables()" style="width:130px;"></td>
+              <td><input type="number" class="invoiceable-overhead" value="15" min="0" max="100" step="0.1" onchange="calculateInvoiceables()" style="width:80px;"></td>
+              <td><input type="checkbox" class="invoiceable-overhead-check" checked onchange="calculateInvoiceables()"></td>
+              <td><input type="text" class="procedure-input" value="Staff training and certification costs" style="width:280px;"></td>
+            </tr>
+            <tr>
+              <td style="background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%); text-align:left;">
+                <input type="text" class="procedure-input" value="Equipment/Supplies" style="width:280px;">
+              </td>
+              <td><input type="number" class="invoiceable-cost" value="800" step="0.01" onchange="calculateInvoiceables()" style="width:130px;"></td>
+              <td><input type="number" class="invoiceable-overhead" value="0" min="0" max="100" step="0.1" onchange="calculateInvoiceables()" style="width:80px;"></td>
+              <td><input type="checkbox" class="invoiceable-overhead-check" onchange="calculateInvoiceables()"></td>
+              <td><input type="text" class="procedure-input" value="Study-specific equipment and supplies" style="width:280px;"></td>
+            </tr>
+            <tr>
+              <td style="background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%); text-align:left;">
+                <input type="text" class="procedure-input" value="IRB/Ethics Review" style="width:280px;">
+              </td>
+              <td><input type="number" class="invoiceable-cost" value="1200" step="0.01" onchange="calculateInvoiceables()" style="width:130px;"></td>
+              <td><input type="number" class="invoiceable-overhead" value="20" min="0" max="100" step="0.1" onchange="calculateInvoiceables()" style="width:80px;"></td>
+              <td><input type="checkbox" class="invoiceable-overhead-check" checked onchange="calculateInvoiceables()"></td>
+              <td><input type="text" class="procedure-input" value="IRB submission and review fees" style="width:280px;"></td>
+            </tr>
+            <tr>
+              <td style="background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%); text-align:left;">
+                <input type="text" class="procedure-input" value="Study Close-out" style="width:280px;"></td>
+              <td><input type="number" class="invoiceable-cost" value="1000" step="0.01" onchange="calculateInvoiceables()" style="width:130px;"></td>
+              <td><input type="number" class="invoiceable-overhead" value="25" min="0" max="100" step="0.1" onchange="calculateInvoiceables()" style="width:80px;"></td>
+              <td><input type="checkbox" class="invoiceable-overhead-check" checked onchange="calculateInvoiceables()"></td>
+              <td><input type="text" class="procedure-input" value="Site close-out activities and final reporting" style="width:280px;"></td>
+            </tr>
+            <tr>
+              <td style="background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%); text-align:left;">
+                <input type="text" class="procedure-input" value="Data Management" style="width:280px;"></td>
+              <td><input type="number" class="invoiceable-cost" value="3000" step="0.01" onchange="calculateInvoiceables()" style="width:130px;"></td>
+              <td><input type="number" class="invoiceable-overhead" value="0" min="0" max="100" step="0.1" onchange="calculateInvoiceables()" style="width:80px;"></td>
+              <td><input type="checkbox" class="invoiceable-overhead-check" onchange="calculateInvoiceables()"></td>
+              <td><input type="text" class="procedure-input" value="CRF design, database setup, and data entry" style="width:280px;"></td>
+            </tr>
+            <tr>
+              <td style="background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%); text-align:left;">
+                <input type="text" class="procedure-input" value="Monitoring Visits" style="width:280px;"></td>
+              <td><input type="number" class="invoiceable-cost" value="2000" step="0.01" onchange="calculateInvoiceables()" style="width:130px;"></td>
+              <td><input type="number" class="invoiceable-overhead" value="30" min="0" max="100" step="0.1" onchange="calculateInvoiceables()" style="width:80px;"></td>
+              <td><input type="checkbox" class="invoiceable-overhead-check" checked onchange="calculateInvoiceables()"></td>
+              <td><input type="text" class="procedure-input" value="CRA monitoring visits and source data verification" style="width:280px;"></td>
+            </tr>
+            <tr>
+              <td style="background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%); text-align:left;">
+                <input type="text" class="procedure-input" value="Regulatory Activities" style="width:280px;"></td>
+              <td><input type="number" class="invoiceable-cost" value="1500" step="0.01" onchange="calculateInvoiceables()" style="width:130px;"></td>
+              <td><input type="number" class="invoiceable-overhead" value="20" min="0" max="100" step="0.1" onchange="calculateInvoiceables()" style="width:80px;"></td>
+              <td><input type="checkbox" class="invoiceable-overhead-check" checked onchange="calculateInvoiceables()"></td>
+              <td><input type="text" class="procedure-input" value="Protocol amendments, safety reporting, regulatory submissions" style="width:280px;"></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color:white; text-align:left;">TOTAL ONE-TIME COSTS</td>
+              <td class="calculated-cell" id="totalInvoiceables" colspan="4">0.00</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== SUMMARY SECTION ===== -->
+    <section id="summarySection" class="tab-section">
+      <div class="summary">
+        <h3>Overall Budget Summary</h3>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <h4>Per-Patient Visit Costs</h4>
+            <div class="summary-row"><strong>Base (no OH):</strong><span id="sumVisitBase">0.00</span></div>
+            <div class="summary-row"><strong>Overhead:</strong><span id="sumVisitOH">0.00</span></div>
+            <div class="summary-row"><strong>Total:</strong><span id="sumVisitTotal">0.00</span></div>
+          </div>
+
+          <div class="summary-card">
+            <h4>One-Time / Invoiceable Costs</h4>
+            <div class="summary-row"><strong>Base (no OH):</strong><span id="sumInvBase">0.00</span></div>
+            <div class="summary-row"><strong>Overhead:</strong><span id="sumInvOH">0.00</span></div>
+            <div class="summary-row"><strong>Total:</strong><span id="sumInvTotal">0.00</span></div>
+          </div>
+
+          <div class="summary-card">
+            <h4>Roll-Up</h4>
+            <div class="summary-row"><strong>Per-Patient (visits):</strong><span id="sumPerPatient">0.00</span></div>
+            <div class="summary-row"><strong>Target Enrollment:</strong><span id="sumEnrollment">0</span></div>
+            <div class="summary-row"><strong>Variable Total (per-patient × N):</strong><span id="sumVariableAll">0.00</span></div>
+            <div class="summary-row"><strong>+ One-Time Costs:</strong><span id="sumOneTime">0.00</span></div>
+            <div class="summary-row"><strong id="grandTotalLabel">Grand Total</strong><span id="grandTotal">0.00</span></div>
+          </div>
+
+          <div class="summary-card">
+            <h4>Overhead Breakdown</h4>
+            <div class="summary-row"><strong>Total Overhead (Visits):</strong><span id="sumOHVisitsOnly">0.00</span></div>
+            <div class="summary-row"><strong>Total Overhead (Invoiceables):</strong><span id="sumOHInvOnly">0.00</span></div>
+            <div class="summary-row"><strong>Combined Overhead:</strong><span id="sumOHCombined">0.00</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Per-Visit Totals -->
+      <h3 style="margin-top:20px;">Per-Visit Totals (Per Patient)</h3>
+      <div class="table-container">
+        <table class="budget-table" id="perVisitTable">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Visit</th>
+              <th>Base</th>
+              <th>Overhead</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="perVisitTbody">
+            <!-- filled by JS -->
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td style="text-align:left;">Totals</td>
+              <td class="calculated-cell" id="perVisitBaseSum">0.00</td>
+              <td class="calculated-cell" id="perVisitOHSum">0.00</td>
+              <td class="calculated-cell" id="perVisitTotalSum">0.00</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Per-Patient Payment Schedule (Milestones) -->
+      <h3 style="margin-top:10px;">Per-Patient Payment Schedule (Milestones)</h3>
+      <div class="table-container">
+        <table class="budget-table" id="milestoneTable">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Milestone (Visit)</th>
+              <th>Amount</th>
+              <th>Cumulative</th>
+            </tr>
+          </thead>
+          <tbody id="milestoneTbody">
+            <!-- filled by JS -->
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td style="text-align:left;">Per-Patient Total</td>
+              <td class="calculated-cell" id="milestoneTotal">0.00</td>
+              <td class="calculated-cell" id="milestoneCumulative">0.00</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (function(){
+      const $ = (s, root=document) => root.querySelector(s);
+      const $$ = (s, root=document) => Array.from(root.querySelectorAll(s));
+
+      // Plain number formatting (2 decimals), no currency symbol
+      function currency(n){
+        const v = Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+        return v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
+      function getVisitCount(){
+        const ths = $$('#budgetTable thead tr th');
+        // 4 fixed left + 1 final total
+        return Math.max(0, ths.length - 5);
+      }
+      function getVisitNames(){
+        return $$('#budgetTable thead tr th.visit-header input').map(inp => inp.value || 'Visit');
+      }
+
+      function eachBudgetRow(cb){ $$('#budgetTable tbody tr').forEach(cb); }
+
+      function computeRow(tr){
+        const costInput = $('.cost-input', tr);
+        const overheadInput = $('.overhead-input', tr);
+        const overheadCheck = $('.overhead-checkbox', tr);
+
+        const unit = parseFloat(costInput?.value) || 0;
+        const oh = parseFloat(overheadInput?.value) || 0;
+        const factor = (overheadCheck && overheadCheck.checked) ? (1 + oh/100) : 1;
+
+        const visitCount = getVisitCount();
+        const tds = $$('td', tr);
+        let total = 0;
+        for (let i = 0; i < visitCount; i++){
+          const input = $('input[type="number"]', tds[4 + i]);
+          const n = parseFloat(input?.value) || 0;
+          total += n * unit * factor;
+        }
+        const lastCell = tds[tds.length - 1];
+        if (lastCell) lastCell.textContent = currency(total);
+        return total;
+      }
+
+      function ensureTfootStructure(){
+        const tfootRow = $('#budgetTable tfoot tr.total-row');
+        if (!tfootRow) return;
+        const desired = 4 + getVisitCount() + 1;
+        while (tfootRow.children.length < desired){
+          const td = document.createElement('td');
+          td.className = 'calculated-cell';
+          td.textContent = currency(0);
+          tfootRow.insertBefore(td, tfootRow.lastElementChild);
+        }
+        while (tfootRow.children.length > desired){
+          tfootRow.removeChild(tfootRow.children[tfootRow.children.length - 2]);
+        }
+      }
+
+      function updateTotals(){
+        ensureTfootStructure();
+        const tfootRow = $('#budgetTable tfoot tr.total-row');
+        if (!tfootRow) return;
+
+        const visitCount = getVisitCount();
+        const perVisitTotals = new Array(visitCount).fill(0);
+        let overall = 0;
+
+        eachBudgetRow(tr=>{
+          const unit = parseFloat($('.cost-input', tr)?.value)||0;
+          const oh = parseFloat($('.overhead-input', tr)?.value)||0;
+          const factor = ($('.overhead-checkbox', tr)?.checked) ? (1 + oh/100) : 1;
+
+          const tds = $$('td', tr);
+          for (let i=0;i<visitCount;i++){
+            const n = parseFloat($('input[type="number"]', tds[4+i])?.value)||0;
+            const val = n * unit * factor;
+            perVisitTotals[i] += val;
+            overall += val;
+          }
+        });
+
+        const tds = $$('td', tfootRow);
+        for (let i=0;i<visitCount;i++){
+          tds[4+i].textContent = currency(perVisitTotals[i]);
+        }
+        tds[tds.length-1].textContent = currency(overall);
+      }
+
+      // ----- Summary computations -----
+      function computeVisitBreakdown(){
+        const visitCount = getVisitCount();
+        let base = 0, total = 0;
+        eachBudgetRow(tr=>{
+          const unit = parseFloat($('.cost-input', tr)?.value)||0;
+          const oh = parseFloat($('.overhead-input', tr)?.value)||0;
+          const apply = $('.overhead-checkbox', tr)?.checked;
+          const factor = apply ? (1 + oh/100) : 1;
+          const tds = $$('td', tr);
+          for (let i=0;i<visitCount;i++){
+            const n = parseFloat($('input[type="number"]', tds[4+i])?.value)||0;
+            base += n * unit;
+            total += n * unit * factor;
+          }
+        });
+        return { base, overhead: total - base, total };
+      }
+
+      // Per-visit arrays
+      function computePerVisitBreakdownArrays(){
+        const visitCount = getVisitCount();
+        const base = new Array(visitCount).fill(0);
+        const total = new Array(visitCount).fill(0);
+
+        eachBudgetRow(tr=>{
+          const unit = parseFloat($('.cost-input', tr)?.value)||0;
+          const oh = parseFloat($('.overhead-input', tr)?.value)||0;
+          const apply = $('.overhead-checkbox', tr)?.checked;
+          const factor = apply ? (1 + oh/100) : 1;
+          const tds = $$('td', tr);
+          for (let i=0;i<visitCount;i++){
+            const n = parseFloat($('input[type="number"]', tds[4+i])?.value)||0;
+            base[i]  += n * unit;
+            total[i] += n * unit * factor;
+          }
+        });
+
+        const overhead = total.map((t,i)=> t - base[i]);
+        return { base, overhead, total };
+      }
+
+      function computeInvoiceableBreakdown(){
+        let base = 0, total = 0;
+        $$('#invoiceablesTable tbody tr').forEach(tr=>{
+          const amt = parseFloat($('.invoiceable-cost', tr)?.value)||0;
+          const oh = parseFloat($('.invoiceable-overhead', tr)?.value)||0;
+          const checked = $('.invoiceable-overhead-check', tr)?.checked;
+          const factor = checked ? (1 + oh/100) : 1;
+          base += amt;
+          total += amt * factor;
+        });
+        return { base, overhead: total - base, total };
+      }
+
+      function renderPerVisitTables(){
+        const names = getVisitNames();
+        const { base, overhead, total } = computePerVisitBreakdownArrays();
+
+        const tbody = $('#perVisitTbody');
+        tbody.innerHTML = '';
+        let sumBase = 0, sumOH = 0, sumTotal = 0;
+
+        for (let i=0;i<names.length;i++){
+          const tr = document.createElement('tr');
+          const nameTd = document.createElement('td');
+          nameTd.style.textAlign = 'left';
+          nameTd.textContent = names[i];
+
+          const b = base[i] || 0, oh = overhead[i] || 0, t = total[i] || 0;
+          sumBase += b; sumOH += oh; sumTotal += t;
+
+          const bTd = document.createElement('td'); bTd.textContent = currency(b);
+          const ohTd = document.createElement('td'); ohTd.textContent = currency(oh);
+          const tTd = document.createElement('td'); tTd.textContent = currency(t);
+
+          tr.appendChild(nameTd); tr.appendChild(bTd); tr.appendChild(ohTd); tr.appendChild(tTd);
+          tbody.appendChild(tr);
+        }
+
+        $('#perVisitBaseSum').textContent  = currency(sumBase);
+        $('#perVisitOHSum').textContent    = currency(sumOH);
+        $('#perVisitTotalSum').textContent = currency(sumTotal);
+
+        // Milestones (hide zero-amount rows to keep it clean)
+        const mBody = $('#milestoneTbody');
+        mBody.innerHTML = '';
+        let cumulative = 0;
+        for (let i=0;i<names.length;i++){
+          const amt = total[i] || 0;
+          if (amt <= 0) continue; // skip zero-cost visits
+          cumulative += amt;
+
+          const tr = document.createElement('tr');
+          const nTd = document.createElement('td'); nTd.style.textAlign = 'left'; nTd.textContent = names[i];
+          const aTd = document.createElement('td'); aTd.textContent = currency(amt);
+          const cTd = document.createElement('td'); cTd.textContent = currency(cumulative);
+          tr.appendChild(nTd); tr.appendChild(aTd); tr.appendChild(cTd);
+          mBody.appendChild(tr);
+        }
+        $('#milestoneTotal').textContent = currency(total.reduce((a,b)=>a+b,0));
+        $('#milestoneCumulative').textContent = currency(cumulative);
+      }
+
+      function updateSummary(){
+        const visit = computeVisitBreakdown();
+        const inv = computeInvoiceableBreakdown();
+
+        // Per-patient
+        $('#sumVisitBase').textContent  = currency(visit.base);
+        $('#sumVisitOH').textContent    = currency(visit.overhead);
+        $('#sumVisitTotal').textContent = currency(visit.total);
+
+        // One-time
+        $('#sumInvBase').textContent    = currency(inv.base);
+        $('#sumInvOH').textContent      = currency(inv.overhead);
+        $('#sumInvTotal').textContent   = currency(inv.total);
+
+        // Overhead breakdown
+        $('#sumOHVisitsOnly').textContent = currency(visit.overhead);
+        $('#sumOHInvOnly').textContent    = currency(inv.overhead);
+        $('#sumOHCombined').textContent   = currency(visit.overhead + inv.overhead);
+
+        const n = parseInt($('#enrollment')?.value, 10) || 0;
+        $('#sumEnrollment').textContent = n.toString();
+
+        const perPatient = visit.total;
+        const variableAll = perPatient * n;
+        const grand = variableAll + inv.total;
+
+        $('#sumPerPatient').textContent = currency(perPatient);
+        $('#sumVariableAll').textContent = currency(variableAll);
+        $('#sumOneTime').textContent = currency(inv.total);
+        $('#grandTotal').textContent = currency(grand);
+
+        // Per-visit + Milestones tables
+        renderPerVisitTables();
+      }
+
+      // ----- Public functions used by inline handlers -----
+      window.calculateRow = function(el){
+        const tr = el.closest('tr');
+        if (!tr) return;
+        computeRow(tr);
+        updateTotals();
+        updateSummary();
+      };
+
+      window.calculateAll = function(){
+        eachBudgetRow(tr=>computeRow(tr));
+        updateTotals();
+        calculateInvoiceables();
+        updateSummary();
+      };
+
+      window.enableAllOverhead = function(){
+        $$('#budgetTable .overhead-checkbox').forEach(cb => cb.checked = true);
+        calculateAll();
+      };
+
+      window.disableAllOverhead = function(){
+        $$('#budgetTable .overhead-checkbox').forEach(cb => cb.checked = false);
+        calculateAll();
+      };
+
+      window.applyDefaultOverhead = function(){
+        const val = parseFloat($('#defaultOverhead')?.value) || 0;
+        $$('#budgetTable .overhead-input').forEach(inp => { inp.value = val; });
+        calculateAll();
+      };
+
+      window.addRow = function(){
+        const tbody = $('#budgetTable tbody');
+        const tr = document.createElement('tr');
+        const defaultOH = $('#defaultOverhead') ? parseFloat($('#defaultOverhead').value) || 0 : 0;
+
+        tr.innerHTML = `
+          <td class="procedure-column"><input type="text" class="procedure-input" value="New Procedure"></td>
+          <td class="cost-column"><input type="number" class="cost-input" value="0" step="0.01"></td>
+          <td class="overhead-column"><input type="number" class="overhead-input" value="${defaultOH}" min="0" max="100" step="0.1" onchange="calculateRow(this)"></td>
+          <td class="overhead-enable-column"><input type="checkbox" class="overhead-checkbox" onchange="calculateRow(this)"></td>
+        `;
+        const visitCount = getVisitCount();
+        for (let i=0;i<visitCount;i++){
+          const td = document.createElement('td');
+          td.innerHTML = `<input type="number" value="0" min="0" step="1" onchange="calculateRow(this)">`;
+          tr.appendChild(td);
+        }
+        const totalTd = document.createElement('td');
+        totalTd.className = 'calculated-cell';
+        totalTd.textContent = currency(0);
+        tr.appendChild(totalTd);
+        tbody.appendChild(tr);
+      };
+
+      window.addVisitColumn = function(){
+        const theadRow = $('#budgetTable thead tr');
+        const th = document.createElement('th');
+        th.className = 'visit-header';
+        th.setAttribute('draggable','true');
+        th.setAttribute('ondragstart','handleDragStart(event)');
+        th.setAttribute('ondragover','handleDragOver(event)');
+        th.setAttribute('ondrop','handleDrop(event)');
+        th.setAttribute('ondragend','handleDragEnd(event)');
+        th.innerHTML = `
+          <input type="text" value="New Visit" onchange="updateVisitName(this)" onblur="updateVisitName(this)">
+          <div class="visit-controls"><button class="visit-control-btn" onclick="removeThisVisit(this)" title="Remove">×</button></div>
+        `;
+        theadRow.insertBefore(th, theadRow.lastElementChild);
+
+        $$('#budgetTable tbody tr').forEach(tr=>{
+          const td = document.createElement('td');
+          td.innerHTML = `<input type="number" value="0" min="0" step="1" onchange="calculateRow(this)">`;
+          tr.insertBefore(td, tr.lastElementChild);
+        });
+
+        const tfootRow = $('#budgetTable tfoot tr.total-row');
+        const newTd = document.createElement('td');
+        newTd.className = 'calculated-cell';
+        newTd.textContent = currency(0);
+        tfootRow.insertBefore(newTd, tfootRow.lastElementChild);
+
+        calculateAll();
+      };
+
+      window.removeLastVisitColumn = function(){
+        const visitCount = getVisitCount();
+        if (visitCount <= 1){ alert('At least one visit must remain.'); return; }
+        const theadRow = $('#budgetTable thead tr');
+        const ths = $$('th', theadRow);
+        const lastVisitTh = ths[ths.length - 2];
+        lastVisitTh.remove();
+
+        $$('#budgetTable tbody tr').forEach(tr=>{
+          const tds = $$('td', tr);
+          tr.removeChild(tds[tds.length - 2]);
+        });
+
+        const tfootRow = $('#budgetTable tfoot tr.total-row');
+        const tds = $$('td', tfootRow);
+        tfootRow.removeChild(tds[tds.length - 2]);
+
+        calculateAll();
+      };
+
+      window.removeThisVisit = function(btn){
+        const th = btn.closest('th');
+        if (!th) return;
+        const ths = $$('#budgetTable thead tr th');
+        const idx = ths.indexOf(th);
+        const visitCount = getVisitCount();
+        if (visitCount <= 1){ alert('At least one visit must remain.'); return; }
+        th.remove();
+        $$('#budgetTable tbody tr').forEach(tr=>{
+          const tds = $$('td', tr);
+          if (tds[idx]) tds[idx].remove();
+        });
+        const tfootRow = $('#budgetTable tfoot tr.total-row');
+        const tfootTds = $$('td', tfootRow);
+        if (tfootTds[idx]) tfootTds[idx].remove();
+        calculateAll();
+      };
+
+      window.updateVisitName = function(_input){ /* no-op; value shows in header */ };
+
+      // Drag & drop columns
+      let dragColIndex = null;
+      function isVisitColIndex(colIdx){
+        const ths = $$('#budgetTable thead tr th');
+        return colIdx >= 4 && colIdx < ths.length - 1;
+      }
+      function moveColumn(from, to){
+        if (from === to) return;
+        const rows = $$('#budgetTable tr');
+        rows.forEach(row=>{
+          const cells = Array.from(row.children);
+          const cell = cells[from];
+          if (!cell) return;
+          if (from < to){ row.insertBefore(cell, cells[to + 1]); }
+          else { row.insertBefore(cell, cells[to]); }
+        });
+      }
+      window.handleDragStart = function(e){
+        const th = e.target.closest('th');
+        const ths = $$('#budgetTable thead tr th');
+        dragColIndex = ths.indexOf(th);
+        th.classList.add('dragging');
+      };
+      window.handleDragOver = function(e){ e.preventDefault(); const th=e.target.closest('th'); if(th) th.classList.add('drag-over'); };
+      window.handleDrop = function(e){
+        e.preventDefault();
+        const targetTh = e.target.closest('th');
+        const ths = $$('#budgetTable thead tr th');
+        const toIdx = ths.indexOf(targetTh);
+        if (isVisitColIndex(dragColIndex) && isVisitColIndex(toIdx)){
+          moveColumn(dragColIndex, toIdx);
+          calculateAll();
+        }
+      };
+      window.handleDragEnd = function(_e){ $$('#budgetTable thead tr th').forEach(th=>th.classList.remove('dragging','drag-over')); dragColIndex=null; };
+
+      // Invoiceables
+      window.calculateInvoiceables = function(){
+        let total = 0;
+        $$('#invoiceablesTable tbody tr').forEach(tr=>{
+          const amt = parseFloat($('.invoiceable-cost', tr)?.value) || 0;
+          const oh = parseFloat($('.invoiceable-overhead', tr)?.value) || 0;
+          const checked = $('.invoiceable-overhead-check', tr)?.checked;
+          const factor = checked ? (1 + oh/100) : 1;
+          total += amt * factor;
+        });
+        $('#totalInvoiceables').textContent = currency(total);
+      };
+
+      // Export CSV
+      function tableToCsv(table){
+        const rows = Array.from(table.querySelectorAll('tr'));
+        return rows.map(row=>{
+          const cells = Array.from(row.children);
+          return cells.map(cell=>{
+            const input = cell.querySelector('input');
+            let text;
+            if (input){
+              if (input.type === 'checkbox') text = input.checked ? 'Yes' : 'No';
+              else text = input.value;
+            } else {
+              text = (cell.textContent || '').trim();
+            }
+            return '"' + String(text).replace(/"/g, '""') + '"';
+          }).join(',');
+        }).join('\n');
+      }
+      window.exportToExcel = function(){
+        const csv1 = tableToCsv($('#budgetTable'));
+        const csv2 = tableToCsv($('#invoiceablesTable'));
+        const content = csv1 + '\n\n' + csv2;
+        const blob = new Blob([content], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'clinical-trial-budget.csv';
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      };
+
+      // Delegated recalcs
+      $('#budgetTable').addEventListener('input', (e)=>{
+        const t = e.target;
+        if (
+          t.matches('.cost-input, .overhead-input, .overhead-checkbox') ||
+          (t.matches('input[type="number"]') && t.closest('#budgetTable tbody tr'))
+        ){ window.calculateRow(t); }
+      });
+      $('#invoiceablesTable').addEventListener('input', (e)=>{
+        if (e.target.matches('.invoiceable-cost, .invoiceable-overhead, .invoiceable-overhead-check')){
+          calculateInvoiceables(); updateSummary();
+        }
+      });
+      $('#enrollment').addEventListener('input', updateSummary);
+
+      // Tabs switcher
+      window.showSection = function(id, btn){
+        $$('.tab-section').forEach(s => s.classList.remove('active'));
+        $('#' + id).classList.add('active');
+        $$('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (id === 'summarySection') { updateSummary(); }
+      };
+
+      // Init
+      window.addEventListener('DOMContentLoaded', ()=>{
+        window.calculateAll();
+      });
+    })();
+  </script>
+</body>
+</html>
