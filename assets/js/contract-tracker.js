@@ -1,10 +1,16 @@
-// Contract Tracker JavaScript
+// Contract Tracker JavaScript - Enhanced for 90-day deadline tracking
 let contracts = [];
 let editingContractId = null;
+let timerInterval;
 
 // Default settings
-const DEFAULT_TYPES = ['CTA', 'DTA', 'Budget', 'Other'];
+const DEFAULT_TYPES = ['Clinical Trial Agreement', 'CTA', 'DTA', 'Budget', 'Other'];
 const DEFAULT_STATUSES = ['Drafting', 'Internal Review', 'Sent to Sponsor', 'Final QC', 'Signed'];
+
+// Deadline constants
+const DEADLINE_DAYS = 90;
+const URGENT_THRESHOLD = 14;
+const WARNING_THRESHOLD = 30;
 
 // Custom settings
 let customTypes = [];
@@ -78,6 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loadContracts();
     renderContracts();
     updateFilters();
+    updateDashboard();
+    
+    // Start live timer updates
+    startTimerUpdates();
 });
 
 // Load contracts from localStorage
@@ -127,11 +137,11 @@ function openModal(contractId = null) {
         if (contract) {
             modalTitle.textContent = 'Edit Contract';
             document.getElementById('contractTitle').value = contract.title;
-            document.getElementById('sponsorName').value = contract.sponsor;
+            document.getElementById('sponsorName').value = contract.sponsor || '';
             document.getElementById('principalInvestigator').value = contract.principalInvestigator || '';
             document.getElementById('contractType').value = contract.type;
-            document.getElementById('contractStatus').value = contract.status;
-            document.getElementById('dueDate').value = contract.dueDate || '';
+            document.getElementById('contractStatus').value = contract.status || '';
+            document.getElementById('dateReceived').value = contract.dateReceived || '';
             document.getElementById('notes').value = contract.notes || '';
         }
     } else {
@@ -159,7 +169,7 @@ function handleSubmit(e) {
         principalInvestigator: document.getElementById('principalInvestigator').value,
         type: document.getElementById('contractType').value,
         status: document.getElementById('contractStatus').value,
-        dueDate: document.getElementById('dueDate').value,
+        dateReceived: document.getElementById('dateReceived').value,
         notes: document.getElementById('notes').value,
         updatedAt: new Date().toISOString()
     };
@@ -179,6 +189,7 @@ function handleSubmit(e) {
     
     saveContracts();
     renderContracts();
+    updateDashboard();
     closeModal();
 }
 
@@ -193,6 +204,7 @@ function deleteContract(contractId) {
         contracts = contracts.filter(c => c.id !== contractId);
         saveContracts();
         renderContracts();
+        updateDashboard();
     }
 }
 
@@ -222,8 +234,17 @@ function renderContracts() {
         return matchType && matchStatus;
     });
     
-    // Sort by updated date (newest first)
-    filteredContracts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    // Sort by urgency (most urgent first), then by updated date
+    filteredContracts.sort((a, b) => {
+        const urgencyA = getUrgencyLevel(a);
+        const urgencyB = getUrgencyLevel(b);
+        
+        if (urgencyA !== urgencyB) {
+            return urgencyA - urgencyB; // Lower numbers = higher urgency
+        }
+        
+        return new Date(b.updatedAt) - new Date(a.updatedAt);
+    });
     
     // Clear list
     contractsList.innerHTML = '';
@@ -245,17 +266,75 @@ function createContractCard(contract) {
     const card = document.createElement('div');
     card.className = 'contract-card';
     
-    // Check if due date is overdue
-    const isOverdue = contract.dueDate && new Date(contract.dueDate) < new Date();
-    const dueDateClass = isOverdue ? 'due-date overdue' : 'due-date';
+    if (!contract.dateReceived) {
+        // Legacy contracts without dateReceived
+        card.innerHTML = createLegacyContractCard(contract);
+        return card;
+    }
     
-    // Format due date
-    const dueDateText = contract.dueDate ? formatDate(contract.dueDate) : 'No due date';
+    const deadlineInfo = calculateDeadlineInfo(contract.dateReceived);
+    const urgencyLevel = getUrgencyLevel(contract);
+    const statusClass = getStatusClass(urgencyLevel);
     
     // Render markdown notes
     const renderedNotes = contract.notes ? marked.parse(contract.notes) : '';
     
     card.innerHTML = `
+        <div class="contract-header">
+            <div>
+                <div class="contract-title">${escapeHtml(contract.title)}</div>
+                ${contract.sponsor ? `<div class="contract-sponsor">${escapeHtml(contract.sponsor)}</div>` : ''}
+                ${contract.principalInvestigator ? `<div class="contract-pi">PI: ${escapeHtml(contract.principalInvestigator)}</div>` : ''}
+            </div>
+            <div class="contract-actions">
+                <button class="edit-btn" onclick="openModal('${contract.id}')">Edit</button>
+                <button class="btn btn-danger" onclick="deleteContract('${contract.id}')">Delete</button>
+            </div>
+        </div>
+        <div class="contract-meta">
+            <div class="meta-item">
+                <span class="badge" data-type="${contract.type}">${contract.type}</span>
+            </div>
+            ${contract.status ? `
+                <div class="meta-item">
+                    <span class="badge" data-status="${contract.status}">${contract.status}</span>
+                </div>
+            ` : ''}
+        </div>
+        <div class="countdown-container">
+            <div class="countdown-timer ${statusClass}" id="countdown-${contract.id}">
+                ${deadlineInfo.countdownText}
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar-deadline ${statusClass}" style="width: ${deadlineInfo.progressPercent}%"></div>
+            </div>
+            <div class="elapsed-days">
+                ${deadlineInfo.elapsedText} • Deadline: ${formatDate(deadlineInfo.deadline)}
+            </div>
+        </div>
+        ${contract.notes ? `
+            <div class="contract-notes">
+                <button class="notes-toggle" id="toggle-${contract.id}" onclick="toggleNotes('${contract.id}')">
+                    ▶ Show Notes
+                </button>
+                <div class="notes-content" id="notes-${contract.id}" style="display: none;">
+                    ${renderedNotes}
+                </div>
+            </div>
+        ` : ''}
+    `;
+    
+    return card;
+}
+
+// Create legacy contract card for contracts without dateReceived
+function createLegacyContractCard(contract) {
+    const isOverdue = contract.dueDate && new Date(contract.dueDate) < new Date();
+    const dueDateClass = isOverdue ? 'due-date overdue' : 'due-date';
+    const dueDateText = contract.dueDate ? formatDate(contract.dueDate) : 'No due date';
+    const renderedNotes = contract.notes ? marked.parse(contract.notes) : '';
+    
+    return `
         <div class="contract-header">
             <div>
                 <div class="contract-title">${escapeHtml(contract.title)}</div>
@@ -278,6 +357,9 @@ function createContractCard(contract) {
                 <span class="${dueDateClass}">📅 ${dueDateText}</span>
             </div>
         </div>
+        <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 10px; margin-top: 10px; font-size: 0.9rem;">
+            ⚠️ Legacy contract - please edit to add received date for deadline tracking
+        </div>
         ${contract.notes ? `
             <div class="contract-notes">
                 <button class="notes-toggle" id="toggle-${contract.id}" onclick="toggleNotes('${contract.id}')">
@@ -289,8 +371,6 @@ function createContractCard(contract) {
             </div>
         ` : ''}
     `;
-    
-    return card;
 }
 
 // Format date
@@ -423,6 +503,9 @@ function updateModalSelects() {
         const option = document.createElement('option');
         option.value = type;
         option.textContent = type;
+        if (type === 'Clinical Trial Agreement') {
+            option.selected = true;
+        }
         typeSelect.appendChild(option);
     });
     
@@ -435,6 +518,136 @@ function updateModalSelects() {
         statusSelect.appendChild(option);
     });
 }
+
+// Deadline calculation functions
+function calculateDeadlineInfo(dateReceived) {
+    const receivedDate = new Date(dateReceived);
+    const deadline = new Date(receivedDate);
+    deadline.setDate(receivedDate.getDate() + DEADLINE_DAYS);
+    
+    const now = new Date();
+    const timeRemaining = deadline - now;
+    const timeElapsed = now - receivedDate;
+    
+    const daysRemaining = Math.ceil(timeRemaining / (1000 * 60 * 60 * 24));
+    const daysElapsed = Math.floor(timeElapsed / (1000 * 60 * 60 * 24));
+    const progressPercent = Math.min(100, Math.max(0, (daysElapsed / DEADLINE_DAYS) * 100));
+    
+    let countdownText, elapsedText;
+    
+    if (daysRemaining < 0) {
+        const overdueDays = Math.abs(daysRemaining);
+        countdownText = `OVERDUE by ${overdueDays} day${overdueDays !== 1 ? 's' : ''}`;
+        elapsedText = `${daysElapsed} days elapsed`;
+    } else if (daysRemaining === 0) {
+        // Calculate hours and minutes remaining for today
+        const hoursRemaining = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+        countdownText = `${hoursRemaining}h ${minutesRemaining}m remaining TODAY`;
+        elapsedText = `${daysElapsed} days elapsed`;
+    } else if (daysRemaining === 1) {
+        const hoursRemaining = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+        countdownText = `${daysRemaining} day ${hoursRemaining}h ${minutesRemaining}m remaining`;
+        elapsedText = `${daysElapsed} days elapsed`;
+    } else {
+        countdownText = `${daysRemaining} days remaining`;
+        elapsedText = `${daysElapsed} days elapsed`;
+    }
+    
+    return {
+        deadline,
+        daysRemaining,
+        daysElapsed,
+        progressPercent,
+        countdownText,
+        elapsedText,
+        timeRemaining
+    };
+}
+
+function getUrgencyLevel(contract) {
+    if (!contract.dateReceived) return 4; // Legacy contracts go to bottom
+    
+    const deadlineInfo = calculateDeadlineInfo(contract.dateReceived);
+    
+    if (deadlineInfo.daysRemaining < 0) return 0; // Overdue - highest priority
+    if (deadlineInfo.daysRemaining <= URGENT_THRESHOLD) return 1; // Urgent
+    if (deadlineInfo.daysRemaining <= WARNING_THRESHOLD) return 2; // Warning
+    return 3; // On track
+}
+
+function getStatusClass(urgencyLevel) {
+    switch (urgencyLevel) {
+        case 0: return 'overdue';
+        case 1: return 'urgent';
+        case 2: return 'warning';
+        case 3: return 'on-track';
+        default: return 'on-track';
+    }
+}
+
+// Dashboard statistics
+function updateDashboard() {
+    let urgentCount = 0;
+    let warningCount = 0;
+    let onTrackCount = 0;
+    let overdueCount = 0;
+    
+    contracts.forEach(contract => {
+        if (!contract.dateReceived) return; // Skip legacy contracts
+        
+        const urgencyLevel = getUrgencyLevel(contract);
+        switch (urgencyLevel) {
+            case 0: overdueCount++; break;
+            case 1: urgentCount++; break;
+            case 2: warningCount++; break;
+            case 3: onTrackCount++; break;
+        }
+    });
+    
+    document.getElementById('urgentCount').textContent = urgentCount;
+    document.getElementById('warningCount').textContent = warningCount;
+    document.getElementById('onTrackCount').textContent = onTrackCount;
+    document.getElementById('overdueCount').textContent = overdueCount;
+}
+
+// Live timer updates
+function startTimerUpdates() {
+    // Update every minute
+    timerInterval = setInterval(() => {
+        updateCountdownTimers();
+    }, 60000);
+    
+    // Initial update
+    updateCountdownTimers();
+}
+
+function updateCountdownTimers() {
+    contracts.forEach(contract => {
+        if (!contract.dateReceived) return;
+        
+        const countdownElement = document.getElementById(`countdown-${contract.id}`);
+        if (countdownElement) {
+            const deadlineInfo = calculateDeadlineInfo(contract.dateReceived);
+            const urgencyLevel = getUrgencyLevel(contract);
+            const statusClass = getStatusClass(urgencyLevel);
+            
+            countdownElement.textContent = deadlineInfo.countdownText;
+            countdownElement.className = `countdown-timer ${statusClass}`;
+        }
+    });
+    
+    // Update dashboard stats
+    updateDashboard();
+}
+
+// Cleanup timer on page unload
+window.addEventListener('beforeunload', () => {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+});
 
 // Make functions available globally for onclick handlers
 window.openModal = openModal;
